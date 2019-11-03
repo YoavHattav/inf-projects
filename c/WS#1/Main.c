@@ -1,7 +1,6 @@
 #include <stdio.h>
-#include <PowerHouse.h>
-#include <FlipIt.h>
-#include <SwapIt.h>
+#include "functions_WS#1.h"
+
 
 int main()
 {
@@ -28,7 +27,8 @@ int main()
 /******************* powerhouse initiation-ex4*/
 
 	long double result;
-	int N;				
+	int N;
+	printf("enter an overpowered num\n");				
 	scanf("%d", &N);
 	result=PowerHouse(N);
 	printf("%Lf\n", result);
