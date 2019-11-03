@@ -1,0 +1,7 @@
+#ignore all, exept source and headers.
+*
+!/**/
+!**.c
+!**.h
+!.gitignore
+!**.md
