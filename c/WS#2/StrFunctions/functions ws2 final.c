@@ -6,9 +6,9 @@
 #include "mystrs.h"
 
 
-size_t Strlenies(const char *str)
+size_t Mystrlen(const char *str)
 {
-	/***********assert*******/
+	assert(NULL != str);
 	const char *runner= str;
 	while('\0' != *runner)
 	{
@@ -18,7 +18,7 @@ size_t Strlenies(const char *str)
 }
 
 
-int Strcmpies(const char *str_1, const char *str_2)
+int Mystrcmp(const char *str_1, const char *str_2)
 {
 	int result=0;
 	while( '\0' != *str_1  ||  '\0' != *str_2 )
@@ -36,10 +36,10 @@ int Strcmpies(const char *str_1, const char *str_2)
 
 }/*************** strcpy******/
 
-void Strcpyies(char *dest, char *sour)
+void Mystrcpy(char *dest, char *sour)
 {
     int i, leny;
-	leny= strlenies(sour);
+	leny= Mystrlen(sour);
 	for (i=0 ; i<leny ; i++)
 	{
 		*dest= sour[i];
@@ -50,7 +50,7 @@ void Strcpyies(char *dest, char *sour)
 
 /*************** strnnnnncpy******/
 
-void Strncpyies(char *dest, char *sour, int n)
+void Mystrncpy(char *dest, char *sour, int n)
 {
     int i;
 	for ( i=0 ; i<n ; i++ )
@@ -64,7 +64,7 @@ void Strncpyies(char *dest, char *sour, int n)
 
 /*************** strcasecmp ******/
 
-int Strcasecmpies(const char *a, const char *b)
+int Mystrcasecmp(const char *a, const char *b)
 {
     char lowera[50], lowerb[50];
     int casecmpresult=0, i=0;
@@ -83,20 +83,22 @@ int Strcasecmpies(const char *a, const char *b)
         lowerb[i] = tolower(lowerb[i]);
         ++i;
     }
-    casecmpresult= Strcmpies(lowera, lowerb);
+    casecmpresult= Mystrcmp(lowera, lowerb);
     return casecmpresult;
 }
 
 
 /*************** strchries  ******/
 
-char *strchries(const char *chrstr, const char check)
+char *Mystrchr(const char *chrstr, const char check)
 {
-    while (check != *chrstr)
+    assert(NULL != chrstr);
+    const char *runnerchr= chrstr;
+    while (check != *runnerchr)
     {
-        ++chrstr;
+        ++runnerchr;
     }
-    return chrstr;
+    return (char *)runnerchr;
 }
 
 
@@ -104,9 +106,9 @@ char *strchries(const char *chrstr, const char check)
 
 /******* "free needs fixing!!!!!!!!"********
 
-char *Strdupies(const char *sour_str)
+char *Mystrdup(const char *sour_str)
 {
-    char *alocated_str= malloc((Strlenies(sour_str)) * sizeof(char));
+    char *alocated_str= malloc((Mystrlen(sour_str)) * sizeof(char));
     char *duploc=alocated_str;
     while( '\0' != *sour_str)
     {
@@ -120,10 +122,45 @@ char *Strdupies(const char *sour_str)
 
  int main()
  {
-     const char source_str[]="hey dude this is totally awesome to allocate memory!";
-     char *duplocation=Strdupies(source_str);
+     const char source_str[]="hey dude it is totally awesome to allocate memory!";
+     char *duplocation=MyStrdup(source_str);
      printf("%s\n", duplocation);
-     free(alocated_str);
+     free(duplication);
      return 0;
  }
  ************** strdupies main ******/
+
+char *Mystrcat(char *dest_cat, const char *sour_cat)
+{
+    char *runner=dest_cat;
+    while('\0' != *dest_cat)
+    {
+        ++dest_cat;
+    }
+    while ('\0' != *sour_cat)
+    {
+        *dest_cat = *sour_cat;
+        ++sour_cat;
+        ++dest_cat;
+    }
+    return runner;
+}
+
+
+char *Mystrncat(char *dest_cat, const char *sour_cat, int n)
+{
+    char *runner=dest_cat;
+    int i=0;
+    while('\0' != *dest_cat)
+    {
+        ++dest_cat;
+    }
+    for(i=0;i<n;i++)
+    {
+        *dest_cat = *sour_cat;
+        ++sour_cat;
+        ++dest_cat;
+    }
+    return runner;
+}
+
