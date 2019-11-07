@@ -20,6 +20,8 @@ size_t Mystrlen(const char *str)
 
 int Mystrcmp(const char *str_1, const char *str_2)
 {
+	assert(NULL != str_1);
+	assert(NULL != str_2);
 	int result=0;
 	while( '\0' != *str_1  ||  '\0' != *str_2 )
 	{
@@ -38,8 +40,9 @@ int Mystrcmp(const char *str_1, const char *str_2)
 
 void Mystrcpy(char *dest, char *sour)
 {
-    int i, leny;
-	leny= Mystrlen(sour);
+	assert(NULL != dest);
+	assert(NULL != sour);
+    int i=0, leny=Mystrlen(sour);
 	for (i=0 ; i<leny ; i++)
 	{
 		*dest= sour[i];
@@ -52,6 +55,8 @@ void Mystrcpy(char *dest, char *sour)
 
 void Mystrncpy(char *dest, char *sour, int n)
 {
+	assert(NULL != dest);
+	assert(NULL != sour);
     int i;
 	for ( i=0 ; i<n ; i++ )
 	{
@@ -66,6 +71,8 @@ void Mystrncpy(char *dest, char *sour, int n)
 
 int Mystrcasecmp(const char *a, const char *b)
 {
+	assert(NULL != a);
+	assert(NULL != b);
     char lowera[50], lowerb[50];
     int casecmpresult=0, i=0;
     while( '\0' != *a )
@@ -104,22 +111,23 @@ char *Mystrchr(const char *chrstr, const char check)
 
 /************** strdupies main ******/
 
-/******* "free needs fixing!!!!!!!!"********
+
 
 char *Mystrdup(const char *sour_str)
 {
-    char *alocated_str= malloc((Mystrlen(sour_str)) * sizeof(char));
-    char *duploc=alocated_str;
+	assert(NULL != sour_str);
+    char *alocated_str = malloc((Mystrlen(sour_str)) * sizeof(char));
+    char *duploc = alocated_str;
     while( '\0' != *sour_str)
     {
-        *alocated_str=*sour_str;
+        *alocated_str = *sour_str;
         ++alocated_str;
         ++sour_str;
     }
     return duploc;
 }
 
-
+/************* dupies main  ************
  int main()
  {
      const char source_str[]="hey dude it is totally awesome to allocate memory!";
@@ -132,6 +140,8 @@ char *Mystrdup(const char *sour_str)
 
 char *Mystrcat(char *dest_cat, const char *sour_cat)
 {
+	assert(NULL != dest_cat);
+	assert(NULL != sour_cat);
     char *runner=dest_cat;
     while('\0' != *dest_cat)
     {
@@ -149,6 +159,8 @@ char *Mystrcat(char *dest_cat, const char *sour_cat)
 
 char *Mystrncat(char *dest_cat, const char *sour_cat, int n)
 {
+	assert(NULL != dest_cat);
+	assert(NULL != sour_cat);
     char *runner=dest_cat;
     int i=0;
     while('\0' != *dest_cat)
