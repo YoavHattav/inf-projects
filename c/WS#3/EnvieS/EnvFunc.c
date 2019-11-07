@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "env_fun.h"
 
 void LowerIt(char *myenvp)
 {
@@ -92,22 +93,5 @@ char **CpyEnv(const char **envp)
 		++runner_myenvp;
 	}
 	return myenvp;
-}
-
-int main(int argc, char const *argv[],  const char **envp)
-{
-	char **myenvcpy;
-	/* char arr[]="BASAD";
-	char *p_arr=arr;
-	LowerIt(p_arr);
-	printf("%s\n", arr); */
-
-	myenvcpy=CpyEnv(envp);
-	
-	PrintIt((const char **)myenvcpy);
-	CleanEnvCopy(myenvcpy);
-	
-
-	return 0;
 }
 
