@@ -11,12 +11,13 @@
 int main(int argc, char const *argv[],  const char **envp)
 {
 	char **myenvcpy;
+	
 	/* char arr[]="BASAD";
 	char *p_arr=arr;
 	LowerIt(p_arr);
 	printf("%s\n", arr); */
 
-	myenvcpy=CpyEnv(envp);
+	myenvcpy = CpyEnv(envp);
 	
 	PrintIt((const char **)myenvcpy);
 	CleanEnvCopy(myenvcpy);

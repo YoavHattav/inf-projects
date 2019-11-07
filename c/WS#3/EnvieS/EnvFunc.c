@@ -7,17 +7,19 @@
 
 void LowerIt(char *myenvp)
 {
-	char *run=myenvp;
+	char *run = myenvp;
+
 	while('\0' != *run)
 	{
-		*run=tolower(*run);
+		*run = tolower(*run);
 		++run;
 	}
 }
 
 void PrintIt(const char **myenvp)
 {
-	const char **run=myenvp;
+	const char **run = myenvp;
+	
 	while(NULL != *run)
 	{
 		printf("%s\n", *run);
@@ -28,7 +30,7 @@ void PrintIt(const char **myenvp)
 
 void CleanEnvCopy(char **myenvp)
 {
-	char **runner=myenvp;
+	char **runner = myenvp;
 
 	while(NULL != *runner)
 	{
@@ -41,7 +43,8 @@ void CleanEnvCopy(char **myenvp)
 
 size_t MyEnvpLen(const char **envp)
 {
-	const char **runner= envp;
+	const char **runner = envp;
+
 	assert(NULL != envp);
 	
 
@@ -49,13 +52,14 @@ size_t MyEnvpLen(const char **envp)
 	{
 		++runner;
 	}
+
 	return runner-envp;
 }
 
 
 char *MyenvDup(const char *copyofstr)
 {
-	const char *sour_str=copyofstr;
+	const char *sour_str = copyofstr;
     char *alocated_str = malloc((strlen(sour_str)) * sizeof(char));
     char *duploc = alocated_str;
 
@@ -74,9 +78,9 @@ char *MyenvDup(const char *copyofstr)
 char **CpyEnv(const char **envp)
 {
 
-	const char **runner_envp= envp;
+	const char **runner_envp = envp;
 	char **myenvp, **runner_myenvp;
-	int counter=MyEnvpLen(envp);
+	int counter = MyEnvpLen(envp);
 
 	assert(NULL != envp);
 
@@ -87,7 +91,7 @@ char **CpyEnv(const char **envp)
 
 	while (NULL != *runner_envp)
 	{	
-		*runner_myenvp=MyenvDup(*runner_envp);
+		*runner_myenvp = MyenvDup(*runner_envp);
 		LowerIt(*runner_myenvp);				/****can be sent to lower here..****/
 		++runner_envp;
 		++runner_myenvp;
