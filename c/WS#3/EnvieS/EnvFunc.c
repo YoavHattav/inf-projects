@@ -5,6 +5,18 @@
 #include <assert.h>
 #include "env_fun.h"
 
+/*
+Yoav Hattav
+
+07/11/19
+
+reviewer: Israel Drayfus
+*/
+
+
+
+/********* lowers the characters (not needed after lowering in Dup. see line 108.) *****/
+/*
 void LowerIt(char *myenvp)
 {
 	char *run = myenvp;
@@ -15,7 +27,8 @@ void LowerIt(char *myenvp)
 		++run;
 	}
 }
-
+*/
+/********* Prints the strings one by one */
 void PrintIt(const char **myenvp)
 {
 	const char **run = myenvp;
@@ -27,7 +40,23 @@ void PrintIt(const char **myenvp)
 	}
 }
 
+/********** wrapper for malloc *****/
+char *Mymalloc(int flag, int size)
+{
+	char *ptr=NULL;
+	if (1==flag)
+	{
+		return ptr;
+	}
+	else
+	{
+		ptr=malloc((size+1) * sizeof(char));
+		return ptr;
+	}
 
+}
+
+/******** frees the space taken from memory */
 void CleanEnvCopy(char **myenvp)
 {
 	char **runner = myenvp;
@@ -41,6 +70,7 @@ void CleanEnvCopy(char **myenvp)
 	free(myenvp);
 }
 
+/****** returns the size of **envp */
 size_t MyEnvpLen(const char **envp)
 {
 	const char **runner = envp;
@@ -56,25 +86,34 @@ size_t MyEnvpLen(const char **envp)
 	return runner-envp;
 }
 
-
+/********** duplicates the strng into another */
 char *MyenvDup(const char *copyofstr)
 {
+	int flag=0;
 	const char *sour_str = copyofstr;
-    char *alocated_str = malloc((strlen(sour_str)) * sizeof(char));
+	int size=strlen(sour_str);
+    char *alocated_str = Mymalloc(flag, size);
     char *duploc = alocated_str;
 
+    if(alocated_str==NULL)
+    {
+    	return NULL;
+    }
+    
 	assert(NULL != copyofstr);
 
 	
     while( '\0' != *sour_str)
     {
-        *alocated_str = *sour_str;
+        *alocated_str = tolower(*sour_str);
         ++alocated_str;
         ++sour_str;
     }
+    *alocated_str='\0';
     return duploc;
 }
 
+/**** makes a copy of **envp *******/
 char **CpyEnv(const char **envp)
 {
 
@@ -92,7 +131,7 @@ char **CpyEnv(const char **envp)
 	while (NULL != *runner_envp)
 	{	
 		*runner_myenvp = MyenvDup(*runner_envp);
-		LowerIt(*runner_myenvp);				/****can be sent to lower here..****/
+		/*LowerIt(*runner_myenvp);               *****************dont need it*******/				
 		++runner_envp;
 		++runner_myenvp;
 	}

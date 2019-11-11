@@ -6,16 +6,19 @@
 #include "env_fun.h"
 
 
+/*
+Yoav Hattav
+
+07/11/19
+
+reviewer: Israel Drayfus
+*/
+
 
 
 int main(int argc, char const *argv[],  const char **envp)
 {
 	char **myenvcpy;
-	
-	/* char arr[]="BASAD";
-	char *p_arr=arr;
-	LowerIt(p_arr);
-	printf("%s\n", arr); */
 
 	myenvcpy = CpyEnv(envp);
 	
