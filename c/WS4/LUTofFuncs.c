@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "LUT_of_funcs.h"
 
 /********************************/
 /*	Yoav Hattav			        */
