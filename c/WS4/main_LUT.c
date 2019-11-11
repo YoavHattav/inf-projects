@@ -12,7 +12,10 @@
 
 int main()
 {
-	CreatLUT();
+	int (*LUT[256])(char);
+
+	CreatLUT(LUT);
+	USELUT(LUT);
 
 	return 0;
 }
