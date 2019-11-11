@@ -13,6 +13,7 @@
 int InWalid(char c)
 {
 	printf("Invalid fun char, Try again\n");
+
 	return 0;
 }
 
@@ -20,6 +21,7 @@ int InWalid(char c)
 int PrintIt(char ch)
 {
 	printf("%c was Pressed\n", ch);
+
 	return 0;
 }
 
@@ -27,6 +29,7 @@ int PrintIt(char ch)
 int Terminate(char c)
 {
 	printf("Terminating program..\n");
+
 	return 0;
 }
 
@@ -45,13 +48,15 @@ int USELUT(int (*LUT[])(char))
 	}
 
 	system("stty icanon echo");
+	
+	return 0;
 }
 
 /* the function creats the LUT and enters valid functions into it */
-int CreatLUT(int (*LUT[])(char))
+int CreatLUT()
 {
 	int i=0;
-
+	int (*LUT[256])(char);
 	for( ; i<256; i++)
 	{
 		LUT[i] = &InWalid;
@@ -60,6 +65,8 @@ int CreatLUT(int (*LUT[])(char))
 	LUT[65] = &PrintIt;
 	LUT[84] = &PrintIt;
 	LUT[27] = &Terminate;
+
+	USELUT(LUT);
 
 	return 0;
 }
