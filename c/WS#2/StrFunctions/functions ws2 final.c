@@ -36,7 +36,8 @@ int Mystrcmp(const char *str_1, const char *str_2)
 
 	return result;
 
-}/*************** strcpy******/
+}
+/*************** strcpy******/
 
 void Mystrcpy(char *dest, char *sour)
 {

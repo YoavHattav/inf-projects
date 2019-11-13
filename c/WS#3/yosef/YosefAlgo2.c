@@ -11,7 +11,7 @@ int YosefAlgo(int people, int counter)
 
 	for ( ; i<people;i++)
 	{
-	arr[i]= 1;
+		arr[i]= 1;
 	}
 	while(1 < alive)
 	{
