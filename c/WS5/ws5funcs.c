@@ -1,11 +1,10 @@
 /********************************/
 /*	Yoav Hattav			        */
-/*	11.11.19		        	*/
-/*	LUT of Fun       			*/
+/*	13.11.19		        	*/
+/*	Files and strings       	*/
 /*								*/
 /*	Reviewer: Raz the slayer	*/
 /********************************/
-
 
 #include <string.h>
 #include <stdio.h>
@@ -41,7 +40,7 @@ enum State LCounter(const char *filename, const char *s)
 	fclose(fp);
 	printf("Flie %s has %d lines\n", filename, counter);
 
-	return YEY;
+	return GJ;
 }
 
 /*  the function deletes the txt file. */
@@ -51,7 +50,7 @@ enum State Delete(const char *filename, const char *s)
 	if (0 == remove(filename))
 	{
 		printf("file has been removed\n");
-		return YEY;
+		return GJ;
 	}
 	else
 	{
@@ -63,7 +62,7 @@ enum State Delete(const char *filename, const char *s)
 /* the function adds a string to the end of the file */
 enum State AddNormal(const char *filename, const char *s)
 {
-	FILE* fp = fopen(filename, "a");
+	FILE* fp = fopen(filename, "a+");
 
 	if ( NULL == fp)
 	{
@@ -74,7 +73,7 @@ enum State AddNormal(const char *filename, const char *s)
 	fputs(s, fp);
 	fclose(fp);
 
-	return YEY; 
+	return GJ; 
 }
 
 /* the function adds a string to the start of the file
@@ -86,7 +85,7 @@ enum State AddToTop(const char *filename, const char *s)
 	int res = 0;
 	
 	FILE* fpcpy = fopen("Add2topTempcpy.txt", "w+");
-	FILE* fp = fopen(filename, "r");
+	FILE* fp = fopen(filename, "a+");
 
 	assert(NULL != s);
 	assert(NULL != filename);
@@ -124,7 +123,7 @@ enum State AddToTop(const char *filename, const char *s)
 
   	if(0 == res)
   	{
-  		return YEY;
+  		return GJ;
   	}
   	else
   	{
@@ -233,12 +232,12 @@ void Infrastructure(const char *filename, chain op[])
 
 		for ( i = 0 ; i < 5 ; i++ )
 		{
-			if(op[i].pcmp(op[i].s,strin) == 0 )
+			if(0 == op[i].pcmp(op[i].s,strin))
 			{
 				status = op[i].pop(filename,strin);
 				break;
 			}
 		}
-	}while (status == YEY );
+	}while (status == GJ );
 
 }

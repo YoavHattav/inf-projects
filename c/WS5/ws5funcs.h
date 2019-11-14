@@ -1,7 +1,7 @@
 /********************************/
 /*	Yoav Hattav			        */
-/*	11.11.19		        	*/
-/*	LUT of Fun       			*/
+/*	13.11.19		        	*/
+/*	Files and strings       	*/
 /*								*/
 /*	Reviewer: Raz the slayer	*/
 /********************************/
@@ -17,7 +17,8 @@
 #define UNUSED(s) (void)(s), (void)(filename)
 
 
-typedef enum State {YEY, FAILED_TO_OPEN_FILE, Failed_to_Delete, Failed_to_DelRename, FAILED_TO_OPEN_CPYFILE, EXIT} State;
+typedef enum State {GJ, FAILED_TO_OPEN_FILE, Failed_to_Delete,
+ Failed_to_DelRename, FAILED_TO_OPEN_CPYFILE, EXIT} State;
 
 
 typedef struct  chain
