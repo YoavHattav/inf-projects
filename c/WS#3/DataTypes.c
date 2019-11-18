@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stddef.h>
 
-void DataSize()
+int main()
 {
 printf("int %d\n", sizeof(int));
 printf("char %d\n", sizeof(char));
@@ -15,4 +15,6 @@ printf("short %d\n", sizeof(short));
 printf("unsigned short %d\n", sizeof(unsigned short));
 printf("long %ld\n", sizeof(long));
 printf("unsigned long %lu\n", sizeof(unsigned long));
+
+return 0;
 }
