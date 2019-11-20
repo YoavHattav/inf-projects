@@ -14,7 +14,7 @@
 #include <stdlib.h>
 
 #define MAX 150
-#define UNUSED(s) (void)(s), (void)(filename)
+#define UNUSED(s) (void)(s)
 
 
 typedef enum State {GJ, FAILED_TO_OPEN_FILE, Failed_to_Delete,
