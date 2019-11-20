@@ -10,7 +10,7 @@ typedef struct  mycreation
 	void *data;
 	void (*Pprint)(const void *data);
 	void (*Padd)(void *data, int x);
-	/*int (*Pclean)(void *data);*/
+	int (*Pclean)(void *data);
 
 }FourPStruct;
 
@@ -64,17 +64,23 @@ void AddToStr(void *data, int x)
 	*(char **)data = (void *)realloc(*(char **)data, (len+counter +1));
 
 	sprintf(str, "%d", x);
-	strcat(*(char **)data, str);
+	strcat(*(char **)data, str);  /*make a terminator*/
+
 
 }
 
-/*make a terminator*/
-
-/*int Clean(void data_t)
+int Clean(void* data)
 {
-	free(data_t); data = NULL;
+	free(data); data = NULL;
+
+	return SUCC;
+}
+
+int CleanNothing(void* data)
+{
+	UNUSED(data);
 	return 0;
-}*/
+}
 
 void init(FourPStruct arr[])
 {
@@ -89,17 +95,17 @@ void init(FourPStruct arr[])
 	*((int*)(&arr[1].data)) = 21;
 	arr[1].Pprint = &PrintInt;
 	arr[1].Padd = &AddInt;
-	/*arr[1].Pclean = NULL;*/
+	arr[1].Pclean = CleanNothing;
 
 	*((float*)(&arr[2].data)) = 3.14;
 	arr[2].Pprint = &PrintFloat;
 	arr[2].Padd = &AddFloat;
-	/*arr[2].Pclean = NULL;*/
+	arr[2].Pclean = CleanNothing;
 
 	strcpy(arr[3].data,"Lets Gooo home!");
 	arr[3].Pprint = &PrintStr;
 	arr[3].Padd = &AddToStr;   
-	/*arr[3].Pclean = NULL;*/
+	arr[3].Pclean = &Clean;
 
 }
 
@@ -109,7 +115,7 @@ void InfraS(FourPStruct arr[])
 	int i = 1;
 	
 	int x = 1;
-
+	
 	while (0 != x) 
 	{
 		printf("Pls enter a num 2 add\n");
@@ -121,17 +127,20 @@ void InfraS(FourPStruct arr[])
 			arr[i].Pprint(arr[i].data);
 			arr[i].Padd(&(arr[i].data), x);
 			arr[i].Pprint(arr[i].data);
+			arr[i].Pclean(arr[i].data);
 		}
 	}
+	exit(0);
 }
 
 
 int main()
 {
-	FourPStruct arr[2];
+	FourPStruct arr[3];
 
 	init(arr);
 	InfraS(arr);
 
+	printf("oyoyoyoyoo\n");
 	return 0;
 }

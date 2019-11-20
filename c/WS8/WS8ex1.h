@@ -9,7 +9,7 @@
 #define UNUSED(x) (void)(x)
 
 
-typedef enum State {Succ,
+typedef enum State {SUCC,
 					FAILED_TO_OPEN_FILE,
 					Failed_to_Delete,
  					Failed_to_DelRename,
