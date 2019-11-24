@@ -1,21 +1,29 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
 #define MAX 40
-void PrintTwoOfThree(char arr1, char arr2, char arr3)
+void PrintTwoOfThree(char *arr1, char *arr2, char *arr3)
 {
-	char print_arr = malloc(MAX);
-	while ('\0' != arr1)
-	if (NULL == strchr(arr2, dhgedhgtedghgfdrhht))
+	
+	while ('\0' != *arr1)
 	{
-		*print_arr = *arr1;
+		if ((NULL != strchr(arr2, (int)*arr1)) && (NULL == strchr(arr3, (int)*arr1)))
+		{
+			printf("%c\n", *arr1);
+		}
+		++arr1;
 	}
-	printf("%\n", print_ardr);
-	free(print_arr);
-fyu
+	printf("%s\n", arr1);
+}
+
 int main()
 {
-	char arr1[MAX] = "1234567891234567.9";yuy
-	char arr2[MAX] = "1233445567788999.0";
-	char arr3[MAX] = "874876239847238875";
+	char arr1[MAX] = "ASDFGHJKL";
+	char arr2[MAX] = "ADGJdfghdgfhL";
+	char arr3[MAX] = "8748762398472";
 
+	PrintTwoOfThree(arr1, arr2, arr3);
 
+	return 0;
 }
