@@ -33,42 +33,12 @@ size_t ByWord(int c)
 	return word_size_ch;
 }*/
 
-void *MyMemMoveReverse(void *dest, const void *source, size_t n)
-{
-        char *dest_ptr = (char*) dest;
-        char *source_ptr = (char*) source;
-        const char *src_ptr = source;
 
-        dest_ptr += n-1;
-        source_ptr += n-1;
-
-        while(0 < n)
-        {
-                *dest_ptr = *source_ptr;
-                --dest_ptr;
-                --source_ptr;
-                --n;
-        }
-        return dest;	
-}
-
-
-void *MyMovePlaner(void *dest, const void *source, size_t n)
-{
-	if ((((char*)dest > (char*)source + n)) || ((char*)dest+strlen(dest) < (char*)source))
-	{
-		MymemCpy(dest, source, n);
-	}
-	else 
-	{
-		MyMemMoveReverse(dest, source, n);
-	}
-}
 
 void *Mymemcpy(void *str1, const void *str2, size_t num)
 {
 	char *dest = (char*)str1;
-	const char *src = (char*)str2;
+	char *src = (char*)str2;
 
 	while ((0 != ((size_t)dest % WORD_SIZE)) && (0 < num))
 	{
@@ -175,37 +145,4 @@ int main()
 	printf("%s\n", str5);*/
 
 	return 0;
-}
-
-
-
-void *MyMemMoveReverse(void *dest, const void *source, size_t n)
-{
-        char *dest_ptr = (char*) dest;
-        char *source_ptr = (char*) source;
-        const char *src_ptr = source;
-
-        dest_ptr += n-1;
-        source_ptr += n-1;
-
-        while(0 < n)
-        {
-                *dest_ptr = *source_ptr;
-                --dest_ptr;
-                --source_ptr;
-                --n;
-        }
-        return dest;	
-}
-
-void *MyMemMove(void *dest, const void *source, size_t n)
-{
-	if ((((char*)dest > (char*)source + n)) || ((char*)dest+strlen(dest) < (char*)source))
-	{
-		MyMemCpy(dest, source, n);
-	}
-	else 
-	{
-		MyMemMoveReverse(dest, source, n);
-	}
 }
