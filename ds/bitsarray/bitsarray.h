@@ -1,0 +1,59 @@
+/*********************************/
+/*    Data Structures            */
+/*    Bits Array                 */
+/*    Author :Yoav Hattav        */
+/*    Reviewed By:               */
+/*    Date:     26/11/2019       */
+/*                               */
+/*********************************/
+
+#ifndef __BITS_ARRAY_H__ 
+#define __BITS_ARRAY_H__
+
+#include <stdio.h>
+
+typedef size_t bitsarr_t;
+
+/* This function sets all bits to 1 */
+bitsarr_t BArrSetAllBits(bitsarr_t bits);
+
+/* This function sets all bits to 0 */
+bitsarr_t BArrResetAllBits(bitsarr_t bits);
+
+/* This function checks if given bit is 1 */
+int BArrIsOn(bitsarr_t bits, int position); /* 64 > position > 0 */
+
+/* This function checks if given bit is 0 */
+int BArrIsOff(bitsarr_t bits, int position); /* 64 > position > 0 */
+
+/* This function return the number of the on bits using Hamming Weight */
+size_t BArrCountOn(bitsarr_t bits);
+
+/* This function return the number of the off bits */
+size_t BArrCountOff(bitsarr_t bits);
+
+/* This function sets specific bit to the given status */
+bitsarr_t BArrSetBit(bitsarr_t bits, int position, int status);
+
+/* This function sets specific bit to 1 */
+bitsarr_t BArrSetOn(bitsarr_t bits, int position); /* 64 > position > 0 */
+
+/* This function sets specific bit to 0 */
+bitsarr_t BArrSetOff(bitsarr_t bits, int position); /* 64 > position > 0 */
+
+/* This function rotate the array to left n times */
+bitsarr_t BArrRotateLeft(bitsarr_t bits, int num_of_rotations);
+
+/* This function rotate the array to right n times */
+bitsarr_t BArrRotateRight(bitsarr_t bits, int num_of_rotations);
+
+/* This function return a string presentation of given bits array */
+char* BArrToString(bitsarr_t bits, char* buffer);
+
+/* This function flips specific bit */
+bitsarr_t BArrFlipBit(bitsarr_t bits, int position); /* 64 > position > 0 */
+
+/* This function mirroring a given bits array */
+bitsarr_t BArrMirror(bitsarr_t bits);
+
+#endif

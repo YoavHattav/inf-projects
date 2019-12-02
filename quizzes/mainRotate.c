@@ -2,19 +2,6 @@
 #include <stdio.h>
 #include "IsRotate.h"
 
-/*   int main()
-{
-	const char *s1 = "121234";
-	const char *s2 = "123412";
-	int result = 0;
-
-	result = IsRotatefinal(s1, s2);
-	printf("%d\n", result);
-	return 0;
-
-}
-*/
-
 void Test(int cond, const char *massage)
 {
 	if (1 == cond)

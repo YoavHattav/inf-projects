@@ -1,19 +1,52 @@
+/********************************/
+/*	Yoav Hattav                 */
+/*	24.11.19                    */
+/*	AtoI / ItoA                 */
+/*                              */
+/*	Reviewer: Ben               */
+/********************************/
 #include <stdio.h> 
 #include <string.h>
 
+#define ZERO 48
+#define A_IN_ASCII 55
 
-int MyAtoi(char *str) 
-{ 
-    int num = 0;
-  	
-    while ('\0' != *str) 
-    {	
-        num = num * 10 + *str - 48;
+
+int MyAtoIAnyBase(const char *str, int base)
+{
+    int convertion_res = 0, sign = 0;
+
+    if ('-' == *str)
+    {
         ++str;
-  	}
+        sign = 1;
+    }
 
-    return num; 
-} 
+    while (*(str) != '\0')
+    {
+        convertion_res += (int)*str;
+        printf("%d\n", convertion_res);
+        if ( 9+ZERO >= (int)*str) 
+        {
+            convertion_res -= ZERO;
+        }
+        else if ( 9+ZERO <= (int)*str) 
+        {
+            convertion_res -= A_IN_ASCII;
+        }
+        ++str;
+        if (1 == strlen(str))
+        {
+        	 convertion_res *= base;
+        }
+    }
+    if (1 == sign)
+    {
+        return -convertion_res;
+    }
+
+    return convertion_res;
+}
 
 void StringVerse(char *str)
 {
@@ -31,7 +64,7 @@ void StringVerse(char *str)
 	}
 }
 
-char *MyItoa(int num, char* stri2a, int base)
+char *MyItoaAnyBase(int num, char* stri2a, int base)
 {
 	int negflag = 0;
 	char* str = stri2a;
@@ -73,33 +106,20 @@ char *MyItoa(int num, char* stri2a, int base)
 }
 
 
-
-
-
-/*int main() 
-{ 
-	char str[100]; 
-	cout << "Base:10 " << itoa(1567, str, 10) << endl; 
-	cout << "Base:10 " << itoa(-1567, str, 10) << endl; 
-	cout << "Base:2 " << itoa(1567, str, 2) << endl; 
-	cout << "Base:8 " << itoa(1567, str, 8) << endl; 
-	cout << "Base:16 " << itoa(1567, str, 16) << endl; 
-	return 0; 
-} */
-
-
 int main() 
 { 
-    /*char stratoi[] = "121223233434"; 
-    int num = MyAtoi(stratoi); 
-    printf("%d\n", num); */
-
-    int itoa = 1234;
+	/* ATOI Test */
+    char stratoi[] = "10"; 
+    int atoi = 0;
+    /* ITOA Test */
+    int itoa = 00202;
     char stritoa[30] = {0};
     int base = 2;
-   
-    printf("%s\n", MyItoa(itoa, stritoa, base));
 
+    atoi = MyAtoI(stratoi, base); 
+    printf("%d\n", atoi);
+
+    /*printf("%s\n", MyItoa(itoa, stritoa, base));*/
 
     return 0; 
 } 

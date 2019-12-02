@@ -1,6 +1,13 @@
+/********************************/
+/*	Yoav Hattav                 */
+/*	24.11.19                    */
+/*	AtoI / ItoA                 */
+/*                              */
+/*	Reviewer: Ben               */
+/********************************/
 #include <stdio.h>
 
-#define END(x) ((*(char*)&x) == 1) ? printf("Biggy\n") : printf("Smalls\n");
+#define END(x) ((*(char*)&x) == (x & 0xff)) ? printf("Smalls\n") : printf("Biggy\n");
 
 
 void BiggySmalls(char *integ)
@@ -17,8 +24,9 @@ void BiggySmalls(char *integ)
 
 int main()
 {
-	int x = 1;
-	int num = 0x00001111;
+	int x = 1025;
+	int num = 0x0f;
+	
 	BiggySmalls((char*)&num);
 
 	END(x);
