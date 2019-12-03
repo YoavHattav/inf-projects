@@ -1,11 +1,13 @@
 /*********************************/
-/*    Data Structures            */
-/*    Single Linked List         */       
-/*    Author :Guy Cohen Zedek    */
-/*    Reviewed By:               */
-/*    Date:    2/12/2019         */
-/*                               */
+/*   			             	 */
+/*   Header file DS 4            */
+/*   Yonatan Zaken		         */
+/*   Last Updated 2/12/19        */
+/*   Reviewed by: Guy            */   
+/*			                   	 */
 /*********************************/
+
+#include <stddef.h>
 
 #ifndef __LINKED_LIST_H__
 #define __LINKED_LIST_H__
@@ -13,11 +15,11 @@
 typedef struct Node
 {
     void *data;
-    struct node_t *next;
+    struct Node *next;
 }node_t;
 
 typedef int (*action_func_ptr)(void *node, void *additional);
-typedef int (*match_func_ptr)(node_t *node, void *additional);
+typedef int (*match_func_ptr)(void *node, void *additional);
 
 /* Creates a new node */
 /* WARNING: Doesnt get NULL pointer */
@@ -29,7 +31,7 @@ void SLLDestroy(node_t *node);
 
 /* Inserts a new node before the node sent to the function */
 /* WARNING: Doesnt get NULL pointer */
-int Insert(node_t *node, node_t *next_node);
+int SLLInsert(node_t *node, node_t *next_node);
 
 /* Inserts a new node after the node sent to the function */
 /* WARNING: Doesnt get NULL pointer */
@@ -50,7 +52,7 @@ node_t *SLLGetNode(const node_t *head, match_func_ptr, void *additional);
 
 /* Performs a generic operation on all nodes in the data structure */
 /* WARNING: Doesnt get NULL pointer */
-int SLLForEach(const node_t *head, action_func_ptr, void *additional);
+int SLLForEach(node_t *head, action_func_ptr, void *additional);
 
 /* Returns the number of nodes */
 /* WARNING: Doesnt get NULL pointer */
@@ -65,7 +67,7 @@ node_t *SLLFlip(node_t *head);
 /* WARNING: Doesnt get NULL pointer */
 int SLLHasLoop(const node_t *head);
 
-/* Returns a pointer to the node the create an  */
+/* Returns a pointer to the intersection node */
 /* WARNING: Doesnt get NULL pointer */
 node_t *SLLFindIntersection(const node_t *head1, const node_t *head2);
 

@@ -1,29 +1,39 @@
-#include <assert.h>
-#include <stdlib.h>
+/*********************************/
+/*   Implementing file DS 4      */
+/*   linked list                 */
+/*   Yoav Hattav                 */
+/*   Last Updated 2/12/19        */
+/*   Reviewed by: Israel         */
+/*                               */
+/*********************************/
 
-#include "linkedlist.h"
+#include <stdlib.h> /* malloc */
+#include <assert.h> /* assert */
 
-#define FREE(ptr) {\
-				  	free(ptr); ptr = NULL;\
-				  }
+#include "linkedlist.h" /* linked list functions */
+
+#define FREE(ptr){\
+                 free(ptr); ptr = NULL;\
+                 }
 
 /* Creates a new node */
 /* WARNING: Doesnt get NULL pointer */
 node_t *SLLCreateNode(node_t *next, const void *data)
 {
-	node_t *new_node = (node_t*)malloc(sizeof(node_t));
+    node_t *newnode = NULL;
+    
+    assert(NULL != data);    
 
-	assert(NULL != data);
+    newnode = (node_t *)malloc(sizeof(node_t));
+    if (NULL == newnode)
+    {
+        return NULL;
+    }
 
-	if (NULL == new_node)
-	{
-		return NULL;
-	}
-
-	new_node->next = next;
-	new_node->data = data;
-
-	return new_node;
+    newnode->data = (void *)data;
+    newnode->next = next;
+    
+    return newnode;
 }
 
 /* Destroys the data structure */
@@ -34,31 +44,33 @@ void SLLDestroy(node_t *node)
 
 	assert(NULL != node);
 
+	runner = node;
+
 	while (NULL != runner)
 	{
 		runner = node->next;
+		node->next = NULL;
 		FREE (node);
 		node = runner;
 	}
-
-	FREE(node);
 }
 
 /* Inserts a new node before the node sent to the function */
 /* WARNING: Doesnt get NULL pointer */
-int SLLInsert(node_t *node, node_t *old_node)
+int SLLInsert(node_t *node, node_t *next_node)
 {
-	node_t *temp = NULL;
+	void *temp = NULL;
 
 	assert(NULL != node);
-	assert(NULL != old_node);
+	assert(NULL != next_node);
 
-	node->next = old_node->next;
-	old_node->next = node;
 
-	temp->data = node->data;
-	node->data = old_node->data;
-	old_node->data = temp->data;
+	node->next = next_node->next;
+	next_node->next = node;
+
+	temp = node->data;
+	node->data = next_node->data;
+	next_node->data = temp;
 
 	return 0;
 }
@@ -67,7 +79,6 @@ int SLLInsert(node_t *node, node_t *old_node)
 /* WARNING: Doesnt get NULL pointer */
 int SLLInsertAfter(node_t *new_node, node_t *previous_node)
 {
-
 	assert(NULL != new_node);
 	assert(NULL != previous_node);
 
@@ -82,54 +93,70 @@ int SLLInsertAfter(node_t *new_node, node_t *previous_node)
 /* WARNING: Doesnt get NULL pointer */
 void SLLRemove(node_t *node)
 {
-	node_t *temp = node->next;
+	node_t *temp = NULL;
 
 	assert(NULL != node);
-
+	
+    temp = node->next;
 	node->data = temp->data;
 	node->next = temp->next;
-	FREE(node->next); 
+	FREE(temp); 
 }
 
 /* Removes the node after the node sent to the function */
 /* WARNING: Doesnt get NULL pointer */
 void SLLRemoveAfter(node_t *node)
 {
-	assert(NULL != node);
-
-	{
-		node_t *temp = node->next;
-		node = temp->next;
-		FREE(node->next);
-	}
+    node_t *temp_node = NULL;    
+    
+    assert(NULL != node);  
+	
+	temp_node = node->next;
+	node->next = temp_node->next;
+	FREE(temp_node);
 }
 
 /* Returns a node according to a condition specified by the user */
 /* WARNING: Doesnt get NULL pointer */
-node_t *SLLGetNode(const node_t *head, match_func_ptr, void *additional)
+node_t *SLLGetNode(const node_t *head, match_func_ptr ptr_to_func, void *additional)
 {
-	node_t *runner = head;
-
-	while (0 == match_func_ptr(runner, additional) && NULL != runner)
+	const node_t *runner = NULL;
+    
+    assert(NULL != head);
+    
+    runner = (node_t *)head;
+    
+	while (NULL != runner->next)
 	{
-		runner = runner->next;
+		if (0 == ptr_to_func(runner, additional))
+		{
+			runner = runner->next;
+		}
+		else
+		{
+			return runner;
+		}
+		
 	}
-
-	return runner;
+	return NULL;
 }
 
 /* Performs a generic operation on all nodes in the data structure */
 /* WARNING: Doesnt get NULL pointer */
-int SLLForEach(const node_t *head, action_func_ptr, void *additional)
+int SLLForEach(node_t *head, action_func_ptr ptr_to_func, void *additional)
 {
-	const node_t *runner = head;
+	node_t *runner = NULL;
+	
+	assert(NULL != head);
+    
+    runner = head;
 
-	while (1 == action_func_ptr(runner, additional) && NULL != runner)
+	while ((0 == ptr_to_func(runner, additional)) && (NULL != runner->next))
 	{
 		runner = runner->next;
 	}
 	
-	return !(NULL == runner);
+	return !(NULL == runner->next);
 }
 
 /* Returns the number of nodes */
@@ -168,7 +195,7 @@ node_t *SLLFlip(node_t *head)
 		current = next;
 	}
 
-	return previous;	
+	return previous;
 }
 
 /* Checks if a loop occurs in the structure */
@@ -176,69 +203,73 @@ node_t *SLLFlip(node_t *head)
 /* WARNING: Doesnt get NULL pointer */
 int SLLHasLoop(const node_t *head)
 {
-	node_t *runner = NULL;
-	node_t *speedy = NULL;
-
+	node_t *slow = NULL;
+	node_t *fast = NULL;
+    node_t *temp = NULL;
+	
 	assert(NULL != head);
 
-	runner = head;
-	speedy = head;
-
-	while (runner != speedy && NULL != runner)
+	slow = (node_t *)head;
+	temp = (node_t *)head;
+	fast = (node_t *)head;
+    
+    
+	while ((slow != fast) && (NULL != slow))
 	{
-		runner = runner->next;
-		speedy = runner->next;
+		slow = slow->next;
+		temp = slow->next;
+		fast = temp->next;
 	}
 
-	return ((runner == speedy) && (runner != NULL));
+	return ((slow == fast) && (NULL != slow));
 }
 
 /* Returns a pointer to the node the create an  */
 /* WARNING: Doesnt get NULL pointer */
 node_t *SLLFindIntersection(const node_t *head1, const node_t *head2)
 {
-	node_t *speedy = NULL;
-	node_t *gonzales = NULL;
-	size_t speedysize = 0;
-	size_t gonzalesize = 0;
-	size_t difference = 0;
+	node_t *run1 = NULL;
+	node_t *run2 = NULL;
+	size_t run1_size = 0;
+	size_t run2_size = 0;
+	size_t diff = 0;
 	size_t i = 0;
 
 	assert(NULL != head1);
 	assert(NULL != head2);
     
-    speedysize = SLLSize(head1);
-    gonzalesize = SLLSize(head2);
+    run1_size = SLLSize(head1);
+    run2_size = SLLSize(head2);
 
-	if (speedysize > gonzalesize)
+	if (run1_size > run2_size)
 	{
-		difference = speedysize - gonzalesize;
-		speedy = head1;
-		gonzales = head2;
+		diff = run1_size - run2_size;
+		run1 = (node_t *)head1;
+		run2 = (node_t *)head2;
 	}
 	else
 	{
-		difference = gonzalesize - speedysize;
-		speedy = head2;
-		gonzales = head1;
+		diff = run2_size - run1_size;
+		run1 = (node_t *)head2;
+		run2 = (node_t *)head1;
 	}
 
-	for (i = 0; i < difference i++)
+	for (i = 0; i < diff; ++i)
 	{ 
-        speedy = speedy->next; 
+        run1 = run1->next; 
     }
 
-    while (speedy != NULL && gonzales != NULL)
+    while (NULL != run1 && NULL != run2)
     { 
-        if (speedy == gonzales)
+        if (run1 == run2)
         {
-        	return speedy; 
+        	return run1; 
         }
         
-        speedy = speedy->next; 
-        gonzales = gonzales->next; 
+        run1 = run1->next; 
+        run2 = run2->next; 
     } 
 	
-
 	return NULL;
 }
+

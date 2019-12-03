@@ -1,17 +1,16 @@
 /*********************************/
-/*   			             	 */
+/*                               */
 /*   Main file DS 3              */
-/*   Yonatan Zaken		         */
+/*   Yoav Hattv                  */
 /*   Last Updated 1/12/19        */
-/*   Reviewed by:          */   
-/*			                   	 */
+/*   Reviewed by:                */
+/*                               */
 /*********************************/
-
-
 
 #include <stdio.h>   /* printf */
 #include <string.h>  /* strcpy, strcmp */
 #include <stdlib.h>  /* malloc */
+
 #include "vector.h"   /* stack data structure functions */
 
 #define NORMAL "\033[0m"
