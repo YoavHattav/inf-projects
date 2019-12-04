@@ -12,9 +12,8 @@
 
 #include "linkedlist.h" /* linked list functions */
 
-#define FREE(ptr){\
-                 free(ptr); ptr = NULL;\
-                 }
+#define FREE(ptr) free(ptr); ptr = NULL;
+                 
 
 /* Creates a new node */
 /* WARNING: Doesnt get NULL pointer */
@@ -22,8 +21,6 @@ node_t *SLLCreateNode(node_t *next, const void *data)
 {
     node_t *newnode = NULL;
     
-    assert(NULL != data);    
-
     newnode = (node_t *)malloc(sizeof(node_t));
     if (NULL == newnode)
     {
@@ -63,7 +60,6 @@ int SLLInsert(node_t *node, node_t *next_node)
 
 	assert(NULL != node);
 	assert(NULL != next_node);
-
 
 	node->next = next_node->next;
 	next_node->next = node;
@@ -120,7 +116,7 @@ void SLLRemoveAfter(node_t *node)
 /* WARNING: Doesnt get NULL pointer */
 node_t *SLLGetNode(const node_t *head, match_func_ptr ptr_to_func, void *additional)
 {
-	const node_t *runner = NULL;
+	node_t *runner = NULL;
     
     assert(NULL != head);
     
@@ -138,6 +134,7 @@ node_t *SLLGetNode(const node_t *head, match_func_ptr ptr_to_func, void *additio
 		}
 		
 	}
+	
 	return NULL;
 }
 
@@ -205,20 +202,26 @@ int SLLHasLoop(const node_t *head)
 {
 	node_t *slow = NULL;
 	node_t *fast = NULL;
-    node_t *temp = NULL;
-	
+	node_t *temp = NULL;
+
 	assert(NULL != head);
 
 	slow = (node_t *)head;
-	temp = (node_t *)head;
 	fast = (node_t *)head;
+	temp = (node_t *)head;
     
     
-	while ((slow != fast) && (NULL != slow))
+	while ((NULL != slow->next) && (NULL != fast->next) && (NULL != temp->next))
 	{
-		slow = slow->next;
-		temp = slow->next;
-		fast = temp->next;
+		
+			slow = slow->next;
+			temp = fast->next;
+			fast = temp->next;
+
+			if (slow == fast)
+			{
+				break;
+			}
 	}
 
 	return ((slow == fast) && (NULL != slow));
