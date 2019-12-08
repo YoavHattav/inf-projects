@@ -59,18 +59,18 @@ ssize_t CBufferRead(cbuffer_t *cb , void *buffer, size_t count)
 	count_return = count;
 	run_buff = buffer;
 
-	if (count > cb->capacity)
+	if (count > cb->size)
 	{
-		count = cb->capacity;
-		count_return = cb->capacity;	
+		count = cb->size;
+		count_return = cb->size;	
 	}
 
 	if (cb->capacity < (count + cb->read_index))
 	{
-		memcpy(run_buff, &cb->arr[cb->read_index], cb->capacity - cb->read_index);
+		memcpy(run_buff, &cb->arr[cb->read_index % cb->capacity], cb->capacity - cb->read_index);
 		count -= (cb->capacity - cb->read_index);
+		run_buff = (byte_t *)run_buff + cb->capacity - cb->read_index;
 		cb->read_index = ZERO;
-		run_buff = (char *)run_buff + cb->capacity - cb->read_index;
 	}
 	
 	memcpy(run_buff, &cb->arr[cb->read_index], count);
@@ -84,7 +84,7 @@ ssize_t CBufferWrite(cbuffer_t *cb ,const void *buffer, size_t count)
 {
 	const void *run_buff = NULL;
 	size_t count_return;
-	size_t write_index = cb->read_index + cb->size;
+	size_t write_index = (cb->read_index + cb->size) % cb->capacity;
 
 	assert(NULL != buffer);
 	assert(NULL != cb);
@@ -102,11 +102,13 @@ ssize_t CBufferWrite(cbuffer_t *cb ,const void *buffer, size_t count)
 	{
 		memcpy(&cb->arr[cb->read_index + cb->size], run_buff, cb->capacity - write_index);
 		count -= cb->capacity - write_index;
-		run_buff = (char *)run_buff + cb->capacity - write_index;	
+		run_buff = (byte_t *)run_buff + cb->capacity - write_index;
+		cb->size -= (cb->capacity - write_index);
+		write_index = ZERO;
 	}
 	
-	memcpy(&cb->arr[ZERO], run_buff, count);
-	cb->size += count_return;
+	memcpy(&cb->arr[write_index], run_buff, count);
+	cb->size += count;
 	
 	return count_return;
 }
