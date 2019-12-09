@@ -5,6 +5,7 @@
 /*    Reviewed By: Razul         */
 /*    Date:     09/12/2019       */
 /*********************************/
+
 #include <assert.h> /* assert */ 
 #include <stdlib.h>	/* malloc */ 
 
@@ -18,6 +19,7 @@ struct DLLNode
 	struct DLLNode *next;
 	struct DLLNode *prev;
 };
+
 struct DLL 
 {
 	struct DLLNode head;
@@ -112,7 +114,7 @@ int DLLIsEmpty(const dll_t *dll)
 {
 	assert(NULL != dll);
 
-	return ((dll->head.next == &dll->tail) && (&dll->head == dll->tail.prev));
+	return (dll->head.next == &dll->tail);
 }
 
 size_t DLLSize(const dll_t *dll)
@@ -144,7 +146,7 @@ iterator_t DLLEnd(dll_t *dll)
 {
 	iterator_t it;
 
-	it = (dllnode_t *)&(dll->tail);
+	it = &(dll->tail);
 
 	return it;
 }
