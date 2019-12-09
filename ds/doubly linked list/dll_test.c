@@ -22,136 +22,148 @@
   }\
 }
 
-struct Iterator
-{
-    struct DLLNode *node;
-};
-/*
-int PrintNode(void *node, void *additional) 
-{
-    node_t *n = (node_t*)node;
-    
+int PrintNode(void *data, void *additional) 
+{    
     UNUSED(additional);
     
-    printf("data: %d\n", *(int*)n->data);
+    printf("data: %d\n", *(int *)data);
     
     return 0;
 }
 
-int IsMatch(void *node, void *additional)
-{
-    node_t *n = (node_t*)node;
-    
-    return (*(int*)n->data == *(int*)additional);
+int AddToNode(void *data, void *additional) 
+{    
+    *(int *)data += *(int *)additional;
+
+    return 0;
 }
-*/
+
+int IsMatch(void *data, void *additional)
+{    
+    return (*(int*)data == *(int*)additional);
+}
+
 static void TestDLinkedList()
 {
     int x1 = 1, x2 = 2, x3 = 3, x4 = 4, x5 = 5;
+    int *data1 = NULL;
     dll_t  *dll1 = NULL, *dll2 = NULL, *dll3 = NULL, *dll4 =NULL;
-    iterator_t T1;
+    iterator_t T1, T2, T3;
     
     printf("Linked List 1:\n");
     dll1 = DLLCreate();
-    T1 = DLLEND(dll1);
+    T1 = DLLEnd(dll1);
     T1 = DLLInsert(dll1, T1, &x1);
     RUN_TEST(1 == DLLSize(dll1));
-    RUN_TEST(NULL != DLLInsert(dll1, T1, &x2));
+    T1 = DLLInsert(dll1, T1, &x2);
     RUN_TEST(2 == DLLSize(dll1));
-    RUN_TEST(1 == DLLRemove(T1));
+    DLLRemove(T1);
     RUN_TEST(1 == DLLSize(dll1));
     RUN_TEST(0 == DLLIsEmpty(dll1));
 
     DLLDestroy(dll1);
 
-   /* dll2 = DLLCreate();
-    dll3 = DLLCreate();
-    dll4 = DLLCreate();*/
-    /*
-    RUN_TEST(0 == SLLInsertAfter(node2, node1));
-    RUN_TEST(0 == SLLInsertAfter(node3, node2));
-    RUN_TEST(0 == SLLInsertAfter(node4, node3));
+    printf("Linked List 2:\n");
+    dll1 = DLLCreate();
+    dll2 = DLLCreate();
+    T1 = DLLEnd(dll1);
+    T2 = DLLEnd(dll2);
+    T1 = DLLInsert(dll1, T1, &x1);
+    T2 = DLLInsert(dll2, T2, &x2);
+    RUN_TEST(1 == DLLSize(dll1));
+    RUN_TEST(1 == DLLSize(dll2));
+    T1 = DLLRemove(T1);
+    RUN_TEST(0 == DLLSize(dll1));
+    T1 = DLLInsert(dll1, T1, &x2);
+    T1 = DLLInsert(dll1, T1, &x3);
+    T1 = DLLInsert(dll1, T1, &x4);
+    T1 = DLLInsert(dll1, T1, &x5);
+    T3 = DLLEnd(dll1);
+    T2 = DLLSplice(T1, T3, T2);
+    RUN_TEST(5 == DLLSize(dll2));
+
+    DLLDestroy(dll1);
+    DLLDestroy(dll2);
     
-    RUN_TEST(4 == SLLSize(node1));
-    head = SLLFlip(head);
-    RUN_TEST(node4 == head);
-    SLLDestroy(node4);
+    printf("Linked List 3:\n");
+    dll1 = DLLCreate();
+    dll2 = DLLCreate();
+    T1 = DLLEnd(dll1);
+    T2 = DLLEnd(dll2);
+    T1 = DLLInsert(dll1, T1, &x5);
+    T2 = DLLInsert(dll2, T2, &x2);
+    RUN_TEST(1 == DLLSize(dll1));
+    RUN_TEST(1 == DLLSize(dll2));
+    RUN_TEST(5 == *(int *)(DLLGetData(T1)));
+    T2 = DLLInsert(dll2, T2, &x2);
+    T3 = DLLEnd(dll2);
+    T2 = DLLGetNext(T2);
+    T3 = DLLGetPrev(T3);
+    RUN_TEST(1 == DLLIsSameIter(T2, T3))
+
+    DLLDestroy(dll1);
+    DLLDestroy(dll2);
+
+    printf("Linked List 4:\n");
+    dll1 = DLLCreate();
+    dll2 = DLLCreate();
+    T1 = DLLEnd(dll1);
+    T2 = DLLEnd(dll2);
+    T1 = DLLPushBack(dll1, &x5);
+    T1 = DLLPushBack(dll1, &x4);
+    RUN_TEST(4 == *(int *)(DLLGetData(T1)));
+    RUN_TEST(2 == DLLSize(dll1));
+    T1 = DLLRemove(T1);
+    T1 = DLLGetPrev(T1);
+    RUN_TEST(5 == *(int *)(DLLGetData(T1)));
+    T1 = DLLPushFront(dll1, &x1);
+    RUN_TEST(1 == *(int *)(DLLGetData(T1)));
+    T1 = DLLRemove(T1);
+    RUN_TEST(5 == *(int *)(DLLGetData(T1)));
+    T1 = DLLPushBack(dll1, &x5);
+    T1 = DLLPushBack(dll1, &x4);
+    RUN_TEST(4 == *(int *)(DLLGetData(T1)));
+    T1 = DLLBegin(dll1);
+    T1 = DLLInsert(dll1, T1, &x3);
+    printf("%d\n", *(int *)(DLLGetData(T1)));
+    RUN_TEST(3 == *(int *)(DLLGetData(T1)));
+
+    DLLDestroy(dll1);
+    DLLDestroy(dll2);
+
+    printf("Linked List 5:\n");
+    dll1 = DLLCreate();
+    T1 = DLLEnd(dll1);
+    T1 = DLLPushBack(dll1, &x5);
+    RUN_TEST(5 == *(int *)DLLPopBack(dll1));
+    T1 = DLLPushFront(dll1, &x1);
+    RUN_TEST(1 == *(int *)DLLPopFront(dll1));
+
+    DLLDestroy(dll1);
+
+    printf("Linked List 6:\n");
+    dll1 = DLLCreate();
+    T1 = DLLEnd(dll1);
+    T1 = DLLInsert(dll1, T1, &x1);
+    T1 = DLLInsert(dll1, T1, &x2);
+    T1 = DLLInsert(dll1, T1, &x3);
+    T1 = DLLInsert(dll1, T1, &x4);
+    T1 = DLLInsert(dll1, T1, &x5);
+    T2 = DLLBegin(dll1);
+    T1 = DLLEnd(dll1);
+    RUN_TEST(5 == DLLSize(dll1));
+    DLLForEach(DLLBegin(dll1), DLLEnd(dll1), &PrintNode, &x2);
+    printf("\n");
+    RUN_TEST((DLLGetPrev(DLLGetPrev(T1)))== DLLFind(T2, T1, &IsMatch, &x2));
+
+    DLLForEach(DLLBegin(dll1), DLLEnd(dll1), &AddToNode, &x1);
+    printf("\n");
+
+    DLLForEach(DLLBegin(dll1), DLLEnd(dll1), &PrintNode, &x2);
+    printf("\n");
     
-    printf("\nLinked List 2:\n");
-    node1 = SLLCreateNode(NULL, &x1);
-    node2 = SLLCreateNode(NULL, &x2);
-    node3 = SLLCreateNode(NULL, &x3);
-    node4 = SLLCreateNode(NULL, &x4);
-    
-    RUN_TEST(0 == SLLInsertAfter(node2, node1));
-    RUN_TEST(0 == SLLInsertAfter(node3, node2));
-    RUN_TEST(0 == SLLInsertAfter(node4, node3));
-    
-    RUN_TEST(4 == SLLSize(node1));
-    SLLFlip(node2);
-    RUN_TEST(3 == SLLSize(node4));
-    RUN_TEST(2 == SLLSize(node1));
-    RUN_TEST(node3 == node4->next);
-    RUN_TEST(node2 == SLLFindIntersection(node1, node4));
-    SLLFlip(node4);
-    SLLDestroy(node1);
-    
-    printf("\nLinked List 3:\n");
-    node1 = SLLCreateNode(NULL, &x1);
-    node2 = SLLCreateNode(NULL, &x2);
-    node3 = SLLCreateNode(NULL, &x3);
-    node4 = SLLCreateNode(NULL, &x4);
-    
-    head = node1;
-    
-    RUN_TEST(0 == SLLInsert(node2, node1));
-    RUN_TEST(0 == SLLInsert(node3, node1));
-    RUN_TEST(0 == SLLInsert(node4, node1));
-    
-    RUN_TEST(4 == *(int*)node1->data);  
-    RUN_TEST(1 == *(int*)node2->data);
-    RUN_TEST(2 == *(int*)node3->data);
-    RUN_TEST(3 == *(int*)node4->data);
-    RUN_TEST(4 == SLLSize(node1));
-    
-    RUN_TEST(0 == SLLForEach(head, &PrintNode, 0));
-    SLLRemove(node3);
-    RUN_TEST(3 == SLLSize(node1));
-    SLLRemoveAfter(node1);
-    RUN_TEST(2 == SLLSize(node1));
-    SLLRemove(node1);
-    RUN_TEST(1 == SLLSize(node1));
-    SLLDestroy(node1);
-    
-    printf("\nLinked List 4:\n");
-    node1 = SLLCreateNode(NULL, &x1);
-    node2 = SLLCreateNode(NULL, &x2);
-    node3 = SLLCreateNode(NULL, &x3);
-    node4 = SLLCreateNode(NULL, &x4);
-    head = node1;
-    
-    RUN_TEST(0 == SLLInsertAfter(node2, node1));
-    RUN_TEST(0 == SLLInsertAfter(node3, node2));
-    RUN_TEST(0 == SLLInsertAfter(node4, node3));
-    
-    RUN_TEST(node3 == SLLGetNode(head, &IsMatch, &x3));
-    RUN_TEST(NULL == SLLGetNode(head, &IsMatch, &x5));
-    RUN_TEST(4 == SLLSize(node1));
-    
-    SLLDestroy(node1);
-    
-    printf("\nLinked List 5:\n");
-    node4 = SLLCreateNode(NULL, &x4);
-    node3 = SLLCreateNode(node4, &x3);
-    node2 = SLLCreateNode(node3, &x2);
-    node1 = SLLCreateNode(node2, &x1);
-    
-    node4->next = node1;
-    
-    RUN_TEST(1 == SLLHasLoop(node1));
-    
-    node4->next = NULL;
-    SLLDestroy(node1);*/
+    RUN_TEST(56 == DLLSize(dll1)); /* JUST KIDDING WELL DONE! :)  */
+    DLLDestroy(dll1);
 }
 
 int main()

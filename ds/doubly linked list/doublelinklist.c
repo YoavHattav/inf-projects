@@ -1,7 +1,14 @@
-#include <assert.h>
-#include <stdlib.h>
+/*********************************/
+/*    Data Structures            */
+/*    DLL                        */
+/*    Author :Yoav Hattav        */
+/*    Reviewed By: Razul         */
+/*    Date:     09/12/2019       */
+/*********************************/
+#include <assert.h> /* assert */ 
+#include <stdlib.h>	/* malloc */ 
 
-#include "dllist.h"
+#include "dllist.h" /* API */ 
 
 #define FREE(ptr) free(ptr); ptr = NULL;
 
@@ -15,10 +22,6 @@ struct DLL
 {
 	struct DLLNode head;
 	struct DLLNode tail;
-};
-struct Iterator
-{
-	struct DLLNode *node;
 };
 
 dll_t *DLLCreate()
@@ -42,26 +45,30 @@ dll_t *DLLCreate()
 
 void DLLDestroy(dll_t *dll)
 {
-	iterator_t it = DLLBegin(dll);
+	iterator_t current = dll->head.next;
+	iterator_t next_node = dll->head.next;
 
 	assert(NULL != dll);
 
-	while (it.node != DLLEnd(dll).node)
-	{
-		it = DLLRemove(it);
+	while (current != &dll->tail)
+	{		
+		next_node = next_node->next;
+		FREE(current);
+		current = next_node;
 	}
+	FREE(dll);
 }
 
 iterator_t DLLGetNext(iterator_t it)
 {
-	it.node = it.node->next;
+	it = it->next;
 
 	return it;
 }
 
 iterator_t DLLGetPrev(iterator_t it)
 {
-	it.node = it.node->prev;
+	it = it->prev;
 
 	return it;
 }
@@ -69,20 +76,20 @@ iterator_t DLLGetPrev(iterator_t it)
 iterator_t DLLInsert(dll_t *dll, iterator_t it, void *data)
 {
 
-	dllnode_t *new_node = (dllnode_t *)malloc(sizeof(dllnode_t));
+	iterator_t new_node = (iterator_t)malloc(sizeof(dllnode_t));
 	if (NULL == new_node)
 	{
-		 it.node = &dll->tail;
+		it = &dll->tail;
 		return it;
 	}
 
 	new_node->data = data;
-	new_node->next = it.node;
-	new_node->prev = it.node->prev;
-	it.node->prev = new_node;
+	new_node->next = it;
+	new_node->prev = it->prev;
+	it->prev = new_node;
 	(new_node->prev)->next = new_node;
 
-	it.node = new_node;
+	it = new_node;
 
 	return it;
 }
@@ -91,11 +98,11 @@ iterator_t DLLRemove(iterator_t it)
 {	
 	iterator_t it_temp = it;
 
-	it.node = it.node->next;
-	it_temp.node->next->prev = it_temp.node->prev;
-	it_temp.node->prev->next = it_temp.node->next;
+	it = it->next;
+	it_temp->next->prev = it_temp->prev;
+	it_temp->prev->next = it_temp->next;
 
-	free(it_temp.node); it_temp.node = NULL;
+	FREE(it_temp); 
 
 	return it;
 
@@ -105,7 +112,7 @@ int DLLIsEmpty(const dll_t *dll)
 {
 	assert(NULL != dll);
 
-	return (dll->head.next == dll->tail.prev);
+	return ((dll->head.next == &dll->tail) && (&dll->head == dll->tail.prev));
 }
 
 size_t DLLSize(const dll_t *dll)
@@ -126,32 +133,30 @@ size_t DLLSize(const dll_t *dll)
 
 iterator_t DLLBegin(dll_t *dll)
 {
-
 	iterator_t it;
 
-	it.node = dll->head.next;
+	it = dll->head.next;
 
 	return it;
 }
 
-iterator_t DLLEnd(const dll_t *dll)
+iterator_t DLLEnd(dll_t *dll)
 {
-
 	iterator_t it;
 
-	it.node = (dllnode_t *)&(dll->tail.prev);
+	it = (dllnode_t *)&(dll->tail);
 
 	return it;
 }
 
-void *GetData(iterator_t it)
+void *DLLGetData(iterator_t it)
 {
-	return it.node->data;
+	return it->data;
 }
 
 int DLLIsSameIter(const iterator_t it1, const iterator_t it2)
 {
-	return ((it1.node->next == it2.node->next) && (it1.node->prev == it2.node->prev) && (it1.node->data == it2.node->data));
+	return ((it1->next == it2->next) && (it1->prev == it2->prev) && (it1->data == it2->data));
 }
 
 iterator_t DLLPushBack(dll_t *dll, void *data)
@@ -163,9 +168,13 @@ iterator_t DLLPushBack(dll_t *dll, void *data)
 
 void *DLLPopBack(dll_t *dll)
 {
+	void *data = dll->tail.prev->data;
+
 	assert(NULL != dll);
 
-	DLLRemove(DLLEnd(dll));
+	DLLRemove(DLLGetPrev(DLLEnd(dll)));
+
+	return data;
 }
 
 iterator_t DLLPushFront(dll_t *dll, void *data)
@@ -177,29 +186,54 @@ iterator_t DLLPushFront(dll_t *dll, void *data)
 
 void *DLLPopFront(dll_t *dll)
 {
+	void *data = dll->head.next->data;
+
 	assert(NULL != dll);
 
 	DLLRemove(DLLBegin(dll));
+
+	return data;
 }
 
 iterator_t DLLSplice(iterator_t start, iterator_t end, iterator_t where)
 {
-	start.node->prev->next = end.node;
-	end.node->prev->next = where.node->next;
-	where.node->next->prev = end.node->prev;
-	where.node->next = start.node;
-	end.node->prev = start.node->prev;
-	start.node->prev = where.node;
+	start->prev->next = end;
+	end->prev->next = where->next;
+	where->next->prev = end->prev;
+	where->next = start;
+	end->prev = start->prev;
+	start->prev = where;
 
 	return where;
 }
 
 int DLLForEach(iterator_t start, iterator_t end, action_func_ptr a_ptr, void *ap)
 {
+	iterator_t i = start;
 
+	for (i = start ; i != end ; i = DLLGetNext(i))
+	{
+		if (0 != a_ptr(i->data, ap))
+		{
+			return 1;
+		}
+	}
+
+	return 0;
 }
+
 
 iterator_t DLLFind(iterator_t start, iterator_t end, match_func_ptr m_ptr, void *ap)
 {
+	iterator_t i = start;
 
+	for (i = start ; i != end ; i = DLLGetNext(i))
+	{
+		if (1 == m_ptr(i->data, ap))
+		{
+			return i;
+		}
+	}
+
+	return end;
 }
