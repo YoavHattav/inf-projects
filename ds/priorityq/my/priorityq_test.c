@@ -33,6 +33,11 @@
   }\
 }
 
+int CompareCmp(const void *node_data, const void *user_data, void *param)
+{
+    return (*(int *)node_data - *(int *)user_data);
+}
+
 int PrintIterator(void *data, void *ap)
 {
     UNUSED(ap);

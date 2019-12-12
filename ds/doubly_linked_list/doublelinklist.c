@@ -11,7 +11,7 @@
 
 #include "dllist.h" /* API */ 
 
-#define FREE(ptr) free(ptr); ptr = NULL;
+#define FREE(ptr) {free(ptr); ptr = NULL;}
 
 struct DLLNode
 {
@@ -213,7 +213,7 @@ int DLLForEach(iterator_t start, iterator_t end, action_func_ptr a_ptr, void *ap
 {
 	iterator_t i = start;
 
-	for (i = start ; i != end ; i = DLLGetNext(i))
+	for ( ; i != end ; i = DLLGetNext(i))
 	{
 		if (0 != a_ptr(i->data, ap))
 		{
@@ -229,7 +229,7 @@ iterator_t DLLFind(iterator_t start, iterator_t end, match_func_ptr m_ptr, void 
 {
 	iterator_t i = start;
 
-	for (i = start ; i != end ; i = DLLGetNext(i))
+	for ( ; i != end ; i = DLLGetNext(i))
 	{
 		if (1 == m_ptr(i->data, ap))
 		{
