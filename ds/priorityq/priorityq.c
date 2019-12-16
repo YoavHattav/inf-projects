@@ -29,14 +29,8 @@ struct PQueue
 int MyIsBefore(const void *data1, const void *data2, void *param)
 {
 	wrap_t *rap = (wrap_t *)param;
-	int result = 0;
 
-	assert(NULL != data1);
-	assert(NULL != data2);
-
-	result = rap->pq_user_cmp(data1, data2, param);
-
-	return (0 < result);
+	return (0 < rap->pq_user_cmp((void *)data1, (void *)data2, rap->param));
 }
 
 pq_t *PQCreate(compare_func_ptr user_cmp, void *param)
@@ -72,7 +66,7 @@ void *PQDequeue(pq_t *pq)
 {
 	assert(NULL != pq);
 
-	return SLLPopBack(pq->queue);
+	return SLLPopFront(pq->queue);
 }
 
 int PQEnqueue(pq_t *pq, void *data)
@@ -86,7 +80,7 @@ void *PQPeek(const pq_t *pq)
 {
 	assert(NULL != pq);
 
-	return SLLGetData(SLLPrev(SLLEnd(pq->queue)));
+	return SLLGetData(SLLBegin(pq->queue));
 }
 
 size_t PQSize(const pq_t *pq)
@@ -120,7 +114,6 @@ void *PQErase(pq_t *pq, match_func m_ptr, void *data)
 
 	assert(NULL != pq);
 	assert(NULL != data);
-
 
 	it = SLLFindBy(pq->queue, SLLBegin(pq->queue), SLLEnd(pq->queue), m_ptr, data);
 

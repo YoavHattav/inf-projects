@@ -55,11 +55,11 @@ static void Test()
     RUN_TEST(0 == PQEnqueue(pq, &x3), "enqueue");
     RUN_TEST(0 == PQEnqueue(pq, &x2), "enqueue");
     RUN_TEST(0 == PQEnqueue(pq, &x2), "enqueue");
-    RUN_TEST(3 == *(int *)PQPeek(pq), "peek");
-    RUN_TEST(3 == *(int *)PQDequeue(pq), "Dequeue");
-    RUN_TEST(2 == *(int *)PQDequeue(pq), "Dequeue");
-    RUN_TEST(2 == *(int *)PQDequeue(pq), "Dequeue");
+    RUN_TEST(1 == *(int *)PQPeek(pq), "peek");
     RUN_TEST(1 == *(int *)PQDequeue(pq), "Dequeue");
+    RUN_TEST(2 == *(int *)PQDequeue(pq), "Dequeue");
+    RUN_TEST(2 == *(int *)PQDequeue(pq), "Dequeue");
+    RUN_TEST(3 == *(int *)PQDequeue(pq), "Dequeue");
     PQDestroy(pq);
     
     printf("PQ Test 2:\n");  

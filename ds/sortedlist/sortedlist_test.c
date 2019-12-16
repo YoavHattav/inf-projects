@@ -99,11 +99,11 @@ static void TestCreateList()
     RUN_TEST(3 == SLLSize(sll));
     
     it1 = SLLBegin(sll);
-    RUN_TEST(1 == *(int *)SLLGetData(it1));
+    RUN_TEST(3 == *(int *)SLLGetData(it1));
     it1 = SLLNext(it1);
     RUN_TEST(2 == *(int *)SLLGetData(it1));
     it1 = SLLNext(it1);
-    RUN_TEST(3 == *(int *)SLLGetData(it1));
+    RUN_TEST(1 == *(int *)SLLGetData(it1));
     SortLLRemove(it1);
     RUN_TEST(2 == SLLSize(sll));
     
@@ -120,10 +120,10 @@ static void TestCreateList()
     
     it1 = SLLPrev(SLLEnd(sll));
     
-    RUN_TEST(3 == *(int *)SLLGetData(it1));
-    RUN_TEST(3 == *(int *)SLLPopBack(sll));
+    RUN_TEST(1 == *(int *)SLLGetData(it1));
+    RUN_TEST(1 == *(int *)SLLPopBack(sll));
     RUN_TEST(1 == SLLSize(sll));
-    RUN_TEST(1 == *(int *)SLLPopFront(sll));
+    RUN_TEST(3 == *(int *)SLLPopFront(sll));
     
     SortLLDestroy(sll);
     
@@ -145,7 +145,7 @@ static void TestCreateList()
     it1 = SLLFind(sll, &x4, SLLBegin(sll), SLLEnd(sll));
     RUN_TEST(4 == *(int *)SLLGetData(it1));
     
-    it1 = SLLFind(sll, &x7, SLLBegin(sll), SLLEnd(sll));
+    it1 = SLLFind(sll, &x2, SLLBegin(sll), SLLEnd(sll));
     RUN_TEST(1 == SLLIsSameIter(SLLEnd(sll), it1));
     
     SortLLDestroy(sll);
@@ -187,7 +187,7 @@ static void TestCreateList()
     SLLForEach(SLLBegin(sll), SLLEnd(sll), &PrintIterator, &x0);
     
     RUN_TEST(6 == SLLSize(sll));
-    RUN_TEST(1 == *(int *)SLLGetData(SLLBegin(sll)));
+    RUN_TEST(6 == *(int *)SLLGetData(SLLBegin(sll)));
     SortLLDestroy(sll2);
     SortLLDestroy(sll); 
 }

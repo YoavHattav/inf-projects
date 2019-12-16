@@ -205,48 +205,41 @@ sll_iterator_t SLLFindBy(const sll_t *sll, sll_iterator_t start ,
 
 void SLLMerge(sll_t *dest, sll_t *src)
 {
-	sll_iterator_t src_start = SLLBegin(src);
-	sll_iterator_t src_end = SLLBegin(src);
-	sll_iterator_t dest_current = SLLBegin(dest);
+	sll_iterator_t start_src = SLLBegin(src);
+	sll_iterator_t end_src = SLLEnd(src);
+	
+	sll_iterator_t start_dest = SLLBegin(dest);
+	sll_iterator_t end_dest = SLLEnd(dest);
 
-	assert(NULL != dest);
-	assert(NULL != src);
+	sll_iterator_t where;
+	sll_iterator_t start;
+	sll_iterator_t end;
 
-	while (!(SLLIsSameIter(dest_current, SLLEnd(dest))) && 
-										!(SLLIsSameIter(src_end, SLLEnd(src))))
+	while (0 == SLLIsSameIter(start_src, SLLEnd(src)))
 	{
-		while (!(dest->func(SLLGetData(src_end), 
-										SLLGetData(dest_current), dest->param)))
+
+		while ( !(SLLIsSameIter(start_dest, end_dest)) && 
+	                      (1 != src->func(SLLGetData(start_dest),
+	                                        SLLGetData(start_src), src->param)))
 		{
-			if(!(SLLIsSameIter(dest_current, SLLEnd(dest))))
-			{
-				dest_current = SLLNext(dest_current);
-			}
-			
-		}
-		if((SLLIsSameIter(dest_current, SLLEnd(dest))))
-		{
-			break;
-		}
-		while (dest->func(SLLGetData(src_end), 
-										SLLGetData(dest_current), dest->param))
-		{
-			if(!(SLLIsSameIter(src_end, SLLEnd(src))))
-			{
-				src_end = SLLNext(src_end);
-			}	
+			start_dest = SLLNext(start_dest);
 		}
 
-		DLLSplice(src_start.current, src_end.current, 
-											DLLGetPrev(dest_current.current));
-		dest_current = SLLNext(dest_current);
-		src_start = src_end;
+		start = start_src;
+		where = SLLPrev(start_dest);
+		start_src = SLLNext(start_src);
+
+		while (!(SLLIsSameIter(start_src, end_src)) &&
+		                  (1 != src->func(SLLGetData(start_src)
+		                  	     ,SLLGetData(start_dest), src->param)))
+		{
+			start_src = SLLNext(start_src);
+		}
+
+		end = start_src;
+		start_dest = SLLNext(start_dest);
+
+		DLLSplice(start.current, end.current, where.current);
 	}
 
-	if(SLLIsSameIter(dest_current, SLLEnd(dest)))
-	{
-		src_end = SLLEnd(src);
-		DLLSplice(src_start.current, src_end.current,
-											 DLLGetPrev(dest_current.current));
-	}
 }
