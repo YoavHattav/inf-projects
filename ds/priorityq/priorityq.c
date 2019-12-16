@@ -35,7 +35,6 @@ int MyIsBefore(const void *data1, const void *data2, void *param)
 
 pq_t *PQCreate(compare_func_ptr user_cmp, void *param)
 {	
-
 	pq_t *new_pq = (pq_t *)malloc(sizeof(pq_t));
 	if (NULL != new_pq)
 	{
