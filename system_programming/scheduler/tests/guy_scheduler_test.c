@@ -1,9 +1,8 @@
 /*********************************/
 /*    System Programming         */
 /*    Scheduler                  */       
-/*    Author : Guy Cohen Zedek   */
-/*    Reviewed By:               */
-/*    Date: 12/12/2019           */
+/*    Author: Guy Cohen Zedek    */
+/*    Date: 16/12/2019           */
 /*                               */
 /*********************************/
 
@@ -37,6 +36,12 @@
 
 int g_arr_test[MAX_SIZE];
 
+struct Wrap
+{
+    scheduler_t *s;
+    ilrd_uid_t uid;
+};
+
 int Print(void *data)
 {
     printf("%d\n", *(int *)data);
@@ -49,6 +54,15 @@ int Stop(void *packet)
     SchedulerStop(packet);
     
     return 0;
+}
+
+int Remove(void *packet)
+{
+    struct Wrap *w = (struct Wrap *)packet;
+    printf("remove\n");
+    SchedulerRemoveTask(w->s, w->uid);
+    
+    return 0;         
 }
 
 static void TestSchedulerCreate()
@@ -142,24 +156,27 @@ static void TestSchedulerRemove()
 static void TestSchedulerRun()
 {
     scheduler_t *s = NULL;
+    struct Wrap w = {0};
     
     printf("\nScheduler Run:\n"); 
-    printf("press Ctrl+c to stop\n");   
+    
     s = SchedulerCreate();
-
+    w.s = s;
+    
     SchedulerAddTask(s, &Print, 6, &g_arr_test[6]);
     SchedulerAddTask(s, &Print, 5, &g_arr_test[5]);
     SchedulerAddTask(s, &Print, 4, &g_arr_test[4]);
-    SchedulerAddTask(s, &Stop, 3, s);
+    SchedulerAddTask(s, &Stop, 10, s);
     SchedulerAddTask(s, &Print, 2, &g_arr_test[2]);
     SchedulerAddTask(s, &Print, 1, &g_arr_test[1]);
-    
-    RUN_TEST(6 == SchedulerSize(s));
+    w.uid = SchedulerAddTask(s, &Remove, 7, &w);
+
+    RUN_TEST(7 == SchedulerSize(s));
     
     SchedulerRun(s);
-    
+    printf("stop\n");
     SchedulerRun(s);
-        
+    RUN_TEST(6 == SchedulerSize(s)); 
     SchedulerDestroy(s);
 }
 

@@ -131,8 +131,8 @@ void Test(scheduler_t *scduler)
 
 int main()
 {
-	/*TestTask();
-	*/
+	/*TestTask();*/
+	
 	scheduler_t *scduler = SchedulerCreate();
 	
 	Test1(scduler);

@@ -13,6 +13,7 @@
 #include "sortedlist.h" /* API */ 
 
 #define FREE(ptr) free(ptr); ptr = NULL;
+#define UNUSED(s) (void)(s)
 
 struct SLL
 {
@@ -166,6 +167,8 @@ sll_iterator_t SLLFind(const sll_t *sll, const void *data, sll_iterator_t start,
 															 sll_iterator_t end)
 {
 	sll_iterator_t runner;
+
+	UNUSED(start);
 
 	assert(NULL != sll);
 	assert(NULL != data);

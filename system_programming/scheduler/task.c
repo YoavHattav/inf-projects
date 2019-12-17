@@ -1,15 +1,13 @@
 /*********************************/
-/*   			             	 */
 /*   System Programming          */
 /*   Task                        */
 /*   Author: Yoav Hattav         */
 /*   Last Updated 15/12/19       */
-/*   Reviewed by:             */   
-/*			                   	 */
+/*   Reviewed by: Daniel         */   
 /*********************************/
-#include <time.h> /*time_t*/
-#include <stdlib.h> /*malloc */
-#include <assert.h>
+#include <time.h>   /* time_t */
+#include <stdlib.h> /* malloc */
+#include <assert.h> /* assert */
 
 #include "task.h" /* Task Functions */
 #include "uid.h" /*UID Functions*/
