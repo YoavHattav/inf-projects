@@ -53,11 +53,11 @@ void SortLLDestroy(sll_t *sll)
 
 sll_iterator_t SortLLInsert(sll_t *sll, void *data)
 {
-	sll_iterator_t runner;
-	runner.current = DLLBegin(sll->list);
+	sll_iterator_t runner = {0};
 
 	assert(NULL != sll);
-	assert(NULL != data);
+
+	runner.current = DLLBegin(sll->list);
 
 	while (DLLEnd(sll->list) != runner.current)
 	{

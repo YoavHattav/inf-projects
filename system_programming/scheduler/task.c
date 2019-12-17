@@ -5,6 +5,7 @@
 /*   Last Updated 15/12/19       */
 /*   Reviewed by: Daniel         */   
 /*********************************/
+
 #include <time.h>   /* time_t */
 #include <stdlib.h> /* malloc */
 #include <assert.h> /* assert */
@@ -20,9 +21,14 @@ task_t *TaskCreate(task_func to_do, time_t interval, void *param)
 	if (NULL != new_task)
 	{
 		new_task->uid = UIDCreate();
+		if (UIDIsBad(new_task->uid))
+        {
+            return NULL;
+        }
+     
 		new_task->taskfunc = to_do;
 		new_task->param = param;
-		new_task->run_time = new_task->uid.time_stamp;
+		new_task->run_time = new_task->uid.time_stamp + interval;
 		new_task->interval = interval;
 		
 		return new_task;

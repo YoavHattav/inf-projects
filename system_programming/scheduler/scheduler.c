@@ -5,12 +5,12 @@
 /*   Last Updated 15/12/19       */
 /*   Reviewed by:   Daniel       */   
 /*********************************/
+
 #include <stddef.h>	/* size_t */
 #include <time.h>	/* time_t */
 #include <assert.h>	/* assert */
 #include <stdlib.h> /* malloc */
 #include <unistd.h> /* sleep  */
-
 
 #include "priorityqueue.h" /* Priority Queue functions */
 #include "task.h"	/*Task Functions*/
@@ -56,28 +56,20 @@ scheduler_t *SchedulerCreate()
 void SchedulerDestroy(scheduler_t *s)
 {
 	SchedulerClear(s);
-
 	PQDestroy(s->q);
-
 	FREE(s);
 }
 
-ilrd_uid_t SchedulerAddTask(scheduler_t *s, task_func to_do, time_t interval, void *param)
+ilrd_uid_t SchedulerAddTask(scheduler_t *s, task_func to_do, time_t interval,
+                                                                      void *param)
 {
-	task_t *new_task = {0};
+	task_t *new_task = NULL;
 	ilrd_uid_t bad_uid = {0};
 
 	assert(NULL != s);
 
 	new_task = TaskCreate(to_do, interval, param);
-	
-	if (NULL == new_task)
-	{
-		return bad_uid;
-	}
-
-
-	if (PQEnqueue(s->q, new_task))
+	if (NULL == new_task || PQEnqueue(s->q, new_task))
 	{
 		FREE(new_task);
 		return bad_uid;
@@ -146,6 +138,7 @@ void SchedulerRun(scheduler_t *s)
 		{
 			TaskDestroy(s->current_task);
 		}
+		s->current_task = NULL;
 	}	
 }
 
@@ -172,7 +165,6 @@ int SchedulerIsEmpty(const scheduler_t *s)
 
 void SchedulerClear(scheduler_t *s)
 {
-	task_t *temp_task = NULL;
 	size_t size = 0;
 
 	assert(NULL != s);
@@ -181,8 +173,7 @@ void SchedulerClear(scheduler_t *s)
 
 	while (0 < size)
 	{
-		temp_task = (task_t *)PQDequeue(s->q);
-		TaskDestroy(temp_task);
+		TaskDestroy((task_t *)PQDequeue(s->q));
 		--size;
 	}
 }
