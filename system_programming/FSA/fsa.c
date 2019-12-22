@@ -1,14 +1,20 @@
-#include <stddef.h> /*size_t*/
-#include <assert.h>
+/*********************************/
+/*   System Programming          */
+/*   fsa                         */
+/*   Yoav Hattav                 */
+/*   Last Updated 17/12/19       */
+/*   Reviewed by: Itay           */   
+/*********************************/
 
-#include "../include/fsa.h"
+#include <stddef.h>	/*size_t*/
+#include <assert.h> /* assert */
+#include <stdio.h> /*sizeof*/
+
+#include "fsa.h" /*priority functions*/
 
 #define BYTES_IN_SMALL_WORD sizeof(size_t)
 #define SIZE_OF_FSA sizeof(fsa_t)
 #define SIZE_OF_BLOCK_HEAD sizeof(header_block_t)
-#define FACTOR_OF_ALIGNING 7
-#define ONE_BYTE 1
-
 
 typedef struct BlockHeader
 {
@@ -38,26 +44,22 @@ size_t BlockCounter(fsa_t *fsa)
 {
 	assert(NULL != fsa);
 
-	return  (fsa->segment_size - SIZE_OF_FSA - FACTOR_OF_ALIGNING) / (fsa->block_size + SIZE_OF_BLOCK_HEAD);
+	return  (fsa->segment_size - SIZE_OF_FSA) / (fsa->block_size
+														 + SIZE_OF_BLOCK_HEAD);
 }
 
-fsa_t *FSAInit(void *allocated, const size_t segment_size, const size_t block_size)
+fsa_t *FSAInit(void *allocated, const size_t segment_size,
+													 const size_t block_size)
 {
 	fsa_t *new_fsa = NULL;
-	char *fsa_aligner = NULL;
 	header_block_t *block_header = NULL;
 	size_t number_of_blocks = 0;
+	size_t index_holder = 0;
 
 	assert(NULL != allocated);
 
-	fsa_aligner = (char *)allocated;
-	while (0 != (size_t)fsa_aligner % BYTES_IN_SMALL_WORD)
-	{
-		++fsa_aligner;
-	}
-
-	new_fsa = (fsa_t *)fsa_aligner;
-	new_fsa->next_available_index = SIZE_OF_FSA + SIZE_OF_BLOCK_HEAD;
+	new_fsa = allocated;
+	new_fsa->next_available_index = SIZE_OF_FSA;
 	new_fsa->block_size = RevisedBlockSize(block_size);
 	new_fsa->segment_size = segment_size;
 
@@ -65,12 +67,20 @@ fsa_t *FSAInit(void *allocated, const size_t segment_size, const size_t block_si
 	block_header->next_free_index = new_fsa->next_available_index;
 	number_of_blocks = BlockCounter(new_fsa);
 
-	while (0 < (number_of_blocks))
+	index_holder = block_header->next_free_index;
+
+	while (0 < (number_of_blocks - 1))
 	{
-		block_header->next_free_index = block_header->next_free_index + new_fsa->block_size + SIZE_OF_BLOCK_HEAD;
-		block_header = (header_block_t *)((char *)block_header + (SIZE_OF_BLOCK_HEAD + new_fsa->block_size));
+		block_header->next_free_index = index_holder + new_fsa->block_size
+														 + SIZE_OF_BLOCK_HEAD;
+		index_holder = block_header->next_free_index;
+		block_header = (header_block_t *)((char *)block_header + 
+									(SIZE_OF_BLOCK_HEAD + new_fsa->block_size));
 		--number_of_blocks;
 	}
+
+	block_header->next_free_index = index_holder + new_fsa->block_size +
+															 SIZE_OF_BLOCK_HEAD;
 
 	return new_fsa;
 }
@@ -88,9 +98,8 @@ void *FSAAlloc(fsa_t *fsa)
 	}
 
 	temp_index_for_swap = fsa->next_available_index;
-	jump_to_available = (header_block_t *)(char *)fsa + fsa->next_available_index;
-	jump_to_available = (header_block_t *)(char *)(jump_to_available - SIZE_OF_BLOCK_HEAD);
-	fsa->next_available_index = (size_t)jump_to_available->next_free_index;
+	jump_to_available = (header_block_t *)((char *)fsa + temp_index_for_swap);
+	fsa->next_available_index = jump_to_available->next_free_index;
 	jump_to_available->next_free_index = temp_index_for_swap;
 
 	return ((void *)((char *)jump_to_available + SIZE_OF_BLOCK_HEAD));
@@ -98,43 +107,41 @@ void *FSAAlloc(fsa_t *fsa)
 
 void FSAFree(void *block)
 {
-	header_block_t *new_ptr = 
-	size_t temp_index =
+	header_block_t *head_runner = NULL;
+	size_t index_for_moving = 0;
+	size_t index_for_holding = 0;
 
 	assert(NULL != block);
 
-	 
+	head_runner = (header_block_t *)((char *)block - SIZE_OF_BLOCK_HEAD);
+	index_for_moving = head_runner->next_free_index;
+	head_runner = (header_block_t *)((char *)head_runner - (index_for_moving));
+	index_for_holding = ((fsa_t *)head_runner)->next_available_index;
+	((fsa_t *)head_runner)->next_available_index = index_for_moving;
+	head_runner = (header_block_t *)((char *)head_runner + (index_for_moving));
+	head_runner->next_free_index = index_for_holding;
 }
 
 size_t FSACountFree(const fsa_t *fsa)
 {	
 	header_block_t *runner = NULL;
 	size_t counter_for_free = 0;
-	size_t end_of_fsa = 0;
 
 	assert(NULL != fsa);
 
-	end_of_fsa = SIZE_OF_FSA + (BlockCounter(fsa) * (SIZE_OF_BLOCK_HEAD + fsa->block_size));
+	runner = (header_block_t *)fsa;
 
-	if (fsa->next_available_index != end_of_fsa)
+	while (fsa->segment_size > runner->next_free_index)
 	{
-		runner = (fsa + (header_block_t *)fsa->next_available_index);
 		++counter_for_free;
-
-		while (end_of_fsa != (size_t)((char *)runner - SIZE_OF_BLOCK_HEAD))
-		{
-			++counter_for_free;
-			runner = (header_block_t *)runner->next_free_index;
-		}
-		
-		return counter_for_free;
+		runner = (header_block_t *)(((char *)fsa + runner->next_free_index));
 	}
 	
-	return 0;	
+	return counter_for_free;
 }
 
 size_t FSASuggestSize(const size_t blocks_count, const size_t block_size)
 {	
 	return ((blocks_count * (RevisedBlockSize(block_size) + SIZE_OF_BLOCK_HEAD))
-	                                         + SIZE_OF_FSA + FACTOR_OF_ALIGNING);
+	                                         					+ SIZE_OF_FSA);
 }
