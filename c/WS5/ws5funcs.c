@@ -8,8 +8,9 @@
 
 #include <string.h>
 #include <stdio.h>
-#include "ws5funcs.h"
 #include <assert.h>
+
+#include "ws5funcs.h"
 
 /* the function counts the lines in the file */
 enum State LCounter(const char *filename, const char *s)
@@ -232,9 +233,9 @@ void Infrastructure(const char *filename, chain op[])
 
 		for ( i = 0 ; i < 5 ; i++ )
 		{
-			if(0 == op[i].pcmp(op[i].s,strin))
+			if(0 == op[i].pcmp(op[i].s, strin))
 			{
-				status = op[i].pop(filename,strin);
+				status = op[i].pop(filename, strin);
 				break;
 			}
 		}

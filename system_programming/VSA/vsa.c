@@ -2,18 +2,20 @@
 /*   System Programming          */
 /*   vsa                         */
 /*   Yoav Hattav                 */
-/*   Last Updated 19/12/19       */
-/*   Reviewed by: Itay           */   
+/*   Last Updated 23/12/19       */
+/*   Reviewed by: Yonatan        */   
 /*********************************/
 
 #include <stddef.h>	/*size_t*/
 #include <assert.h> /* assert */
-#include <stdio.h> /*sizeof*/
 
-#include "vsa.h" /* priority functions */
+#include "vsa.h" 
 
 #define MAGIC_NUMBER 0xDEADBEEF
 #define LAST_HEADER_SIZE 0xFFFFFFFFFFFFFFFF
+#define TWO_HEADERS 2
+#define ONE 1
+#define SIZE_OF_VSA_HEADER sizeof(vsa_t)
 
 struct BlockHeader
 {
@@ -31,13 +33,12 @@ vsa_t *VSAInit(void *allocated, size_t segment_size)
 	vsa_t *runner_start = NULL;
 	vsa_t *runner_end = NULL;
 
-
 	assert(NULL != allocated);
 
 	runner_start = (vsa_t *)allocated;
-	runner_end = (vsa_t *)((char *)allocated + (segment_size - sizeof(vsa_t)));
+	runner_end = (vsa_t *)((char *)allocated + (segment_size - SIZE_OF_VSA_HEADER));
 
-	runner_start->block_size = segment_size - (sizeof(vsa_t) * 2);
+	runner_start->block_size = segment_size - (SIZE_OF_VSA_HEADER * TWO_HEADERS);
 	runner_end->block_size = (long)LAST_HEADER_SIZE;
 
 	#ifndef NDEBUG
@@ -53,9 +54,9 @@ void VSAFree(void *block)
 	assert(NULL != block);
     
     assert(MAGIC_NUMBER == ((vsa_t *)((char *)block 
-    									- sizeof(block_header_t)))->magic_num);
+    									- SIZE_OF_VSA_HEADER))->magic_num);
     
-    ((vsa_t *)((char *)block - sizeof(block_header_t)))->block_size *= -1;
+    ((vsa_t *)((char *)block - SIZE_OF_VSA_HEADER))->block_size *= -ONE;
 }
 
 static void BlockDefragmentation(vsa_t *header)
@@ -66,22 +67,21 @@ static void BlockDefragmentation(vsa_t *header)
 
 	defrag_runner = header;
 
-	if(((block_header_t *)((char *)header + header->block_size + sizeof(vsa_t)))
+	if(((block_header_t *)((char *)header + header->block_size + SIZE_OF_VSA_HEADER))
 										->block_size != (long)LAST_HEADER_SIZE)
 	{
 		defrag_runner = ((block_header_t *)((char *)header + 
-										header->block_size + sizeof(vsa_t)));
+										header->block_size + SIZE_OF_VSA_HEADER));
 	
 		while ((0 <= defrag_runner->block_size) && (defrag_runner->block_size
 													 != (long)LAST_HEADER_SIZE))
 		{
-			header->block_size += defrag_runner->block_size + sizeof(vsa_t);
+			header->block_size += defrag_runner->block_size + SIZE_OF_VSA_HEADER;
 			defrag_runner = (block_header_t *)((char *)defrag_runner + 
-									defrag_runner->block_size + sizeof(vsa_t));
+									defrag_runner->block_size + SIZE_OF_VSA_HEADER);
 		}
 	}
 }
-
 
 void *VSAAlloc(vsa_t *vsa, size_t block_size)
 {
@@ -101,21 +101,21 @@ void *VSAAlloc(vsa_t *vsa, size_t block_size)
     	if(0 > alloc_runner->block_size)
     	{
     		alloc_runner = (block_header_t *)((char *)alloc_runner + 
-    						(alloc_runner->block_size * -1) + sizeof(vsa_t));
+    						(alloc_runner->block_size * -ONE) + SIZE_OF_VSA_HEADER);
 
     		continue;
     	}
 
 		BlockDefragmentation(alloc_runner);
 
-    	if(alloc_runner->block_size >= (long)(block_size + sizeof(vsa_t)))
+    	if(alloc_runner->block_size >= (long)(block_size + SIZE_OF_VSA_HEADER))
     	{
-    		alloc_base = (block_header_t *)((char *)alloc_runner + sizeof(vsa_t));
+    		alloc_base = (block_header_t *)((char *)alloc_runner + SIZE_OF_VSA_HEADER);
     		t_new_block_size = alloc_runner->block_size;
-    		alloc_runner->block_size = block_size * -1;
+    		alloc_runner->block_size = block_size * -ONE;
     		alloc_runner = (block_header_t *)((char *)alloc_runner + 
-    												block_size + sizeof(vsa_t));
-    		alloc_runner->block_size = t_new_block_size - sizeof(vsa_t) - 
+    												block_size + SIZE_OF_VSA_HEADER);
+    		alloc_runner->block_size = t_new_block_size - SIZE_OF_VSA_HEADER - 
     																block_size;
 
     		#ifndef NDEBUG
@@ -125,7 +125,7 @@ void *VSAAlloc(vsa_t *vsa, size_t block_size)
     		return alloc_base;
     	}
 
-    	alloc_runner = (block_header_t *)((char *)alloc_runner + sizeof(vsa_t) +
+    	alloc_runner = (block_header_t *)((char *)alloc_runner + SIZE_OF_VSA_HEADER +
     											 (alloc_runner->block_size));
     }
 
@@ -147,8 +147,7 @@ size_t VSALargestChunkSize(vsa_t *vsa)
 		if(0 > chunk_runner->block_size)
     	{
     		chunk_runner = (block_header_t *)((char *)chunk_runner +
-							   (chunk_runner->block_size * -1) + sizeof(vsa_t));
-
+							   (chunk_runner->block_size * -ONE) + SIZE_OF_VSA_HEADER);
     		continue;
     	}
 
@@ -159,9 +158,9 @@ size_t VSALargestChunkSize(vsa_t *vsa)
     		largest_chunk = chunk_runner->block_size;
     	}
 
-    	chunk_runner = (block_header_t *)((char *)chunk_runner + sizeof(vsa_t) +
+    	chunk_runner = (block_header_t *)((char *)chunk_runner + SIZE_OF_VSA_HEADER +
     											 (chunk_runner->block_size));
 	}
 
-	return (largest_chunk - sizeof(vsa_t));
+	return (largest_chunk - SIZE_OF_VSA_HEADER);
 }

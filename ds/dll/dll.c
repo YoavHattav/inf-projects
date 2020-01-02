@@ -9,7 +9,7 @@
 #include <assert.h> /* assert */ 
 #include <stdlib.h>	/* malloc */ 
 
-#include "dllist.h" /* API */ 
+#include "dll.h" /* API */ 
 
 #define FREE(ptr) {free(ptr); ptr = NULL;}
 

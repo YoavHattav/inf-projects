@@ -1,6 +1,6 @@
 #include <stdio.h> /* printf */
 
-#include "dllist.h"
+#include "dll.h"
 
 #define UNUSED(x) (void)(x)
 #define GREEN "\033[;032m"

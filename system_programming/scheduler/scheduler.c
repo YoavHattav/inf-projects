@@ -12,7 +12,7 @@
 #include <stdlib.h> /* malloc */
 #include <unistd.h> /* sleep  */
 
-#include "priorityqueue.h" /* Priority Queue functions */
+#include "priorityq.h" /* Priority Queue functions */
 #include "task.h"	/*Task Functions*/
 #include "scheduler.h"	/*scheduler Functions*/
 

@@ -7,13 +7,6 @@
 
 #define MAX_UID 10
 
-struct Uid
-{
-    time_t time_stamp;
-    size_t counter;
-    pid_t process_id;
-};
-
 static ilrd_uid_t g_arr[MAX_UID];
 
 static void PrintUID()

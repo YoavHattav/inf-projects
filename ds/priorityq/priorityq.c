@@ -9,7 +9,7 @@
 #include <assert.h> /* assert */ 
 #include <stdlib.h>	/* malloc */ 
 
-#include "priorityqueue.h" /* API */
+#include "priorityq.h" /* API */
 #include "sortedlist.h"    /* API */ 
 
 #define FREE(ptr) free(ptr); ptr = NULL;
