@@ -13,6 +13,8 @@
 
 #include "sorts.h"
 
+#define NUM_OF_BIT_IN_INT 32
+
 void BubbleSort(int *arr, size_t size)
 {
 	int swap_flag = 1;
@@ -89,7 +91,6 @@ int CountingSort(const int *arr, size_t size, int min, int max, int *res)
 
 	int *sum_arr = NULL;
 	size_t i = 0, range = ((max - min) + 1);
-	int holder = 0;
 
 	assert(NULL != arr);
 
@@ -111,15 +112,84 @@ int CountingSort(const int *arr, size_t size, int min, int max, int *res)
 
 	for (i = (size - 1); i > 0; --i)
 	{
-		holder = arr[i];
-		res[sum_arr[arr[i] - min] - 1] = holder;
+		res[sum_arr[arr[i] - min] - 1] = arr[i];
 		--sum_arr[arr[i] - min];
 	}
 
-	holder = arr[i];
-	res[sum_arr[arr[i] - min] - 1] = holder;
+	res[sum_arr[arr[i] - min] - 1] = arr[i];
 
 	free(sum_arr); sum_arr = NULL;
+
 	return 0;
 }
 
+static void RadixCountingSort(unsigned int *src,
+							 unsigned int *dest,
+							 size_t *hist,
+							 size_t size,
+							 unsigned int mask,
+							 unsigned int shift)
+{	
+	size_t i = 0;
+	
+	for (i = 0; i < size; ++i)
+	{
+		++hist[(src[i]>>shift) & mask];
+	}
+
+	for(i = 1; i < (mask + 1); i++)
+	{
+		hist[i] += hist[i - 1];
+	}
+	for(i = (size - 1);0 <= (long)i; --i)
+	{
+		dest[hist[(src[i]>>shift) & mask] - 1] = src[i];
+		--hist[(src[i]>>shift) & mask];
+	}
+	
+}
+
+int RadixSort(unsigned int *arr, size_t size, unsigned int num_of_bits)
+{
+	unsigned int mask = (1 << num_of_bits) - 1;
+	unsigned int i = 0, j = 0;
+	unsigned int shift = 0;
+	unsigned int *swap_ptr = NULL;
+	size_t *hist = NULL;
+	unsigned int *res = NULL;
+
+	assert(NULL != arr);
+
+	hist = (size_t *)calloc((mask + 1) , sizeof(size_t));
+	if (NULL == hist)
+	{
+		return 1;
+	}
+	res = (unsigned int *)malloc(size * sizeof(unsigned int));
+	if (NULL == res)
+	{
+		free(hist); hist = NULL;
+		return 1;
+	}
+
+	for (i = 0; i < (NUM_OF_BIT_IN_INT/num_of_bits); ++i)
+	{
+		shift = i * num_of_bits;
+
+		RadixCountingSort(arr, res, hist, size, mask, shift);
+
+		for (j = 0; j < (mask + 1); j++)
+		{
+			hist[j] = 0;
+		}
+
+		swap_ptr = arr;
+		arr = res;
+		res = swap_ptr;
+	}
+
+	free(hist); hist = NULL;
+	free(res); res = NULL;
+
+	return 0;
+}
