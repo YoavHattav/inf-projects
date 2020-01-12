@@ -3,14 +3,13 @@
 
 #include <stddef.h> /* size_t */
 
+#define UNUSED(x) (void)(x)
+
 typedef struct BSTree bst_t;
 typedef struct BSTNode *bst_itr_t;
 
 typedef int (*compare_func_t)(const void *data1, const void *data2, void *param);
-typedef int (*action_ptr_t)(void *data1, void *data2);
-
-typedef enum State {FALSE, TRUE} State;
-typedef enum Side {LEFT, RIGHT} Side;
+typedef int (*action_func_t)(void *data1, void *data2);
 
 /*********************************************** 
     Returns a pointer to the BST data structure
@@ -50,7 +49,7 @@ bst_itr_t BSTFind(const bst_t *tree, const void *data);
 	Returns 0 for success, otherwise: non-zero value
 	Complexity: worst-case: O(n) 
  ***********************************************************************************/
-int BSTForeach(bst_itr_t start, bst_itr_t end, action_func_ptr action, void *param);
+int BSTForeach(bst_itr_t start, bst_itr_t end, action_func_t action, void *param);
 
 /*********************************************** 
 	Gets a pointer to the tree
@@ -71,7 +70,7 @@ int BSTIsEmpty(const bst_t *tree);
 	Returns the data it contains
 	complexity: O(1)                       
  ***********************************************/
-void *BSTGetData(const bst_itr_t it);
+void *BSTGetData(bst_itr_t it);
 
 /***************************************************** 
 	Gets pointer to the tree
@@ -106,6 +105,6 @@ bst_itr_t BSTPrev(bst_itr_t it);
 	Returns 1 if they are equal, otherwise: 0
 	Complexity: O(1)
  *******************************************************/
-int BSTIsSameItr(const bst_itr_t it1, const bst_itr_t it2);
+int BSTIsSameItr(bst_itr_t it1, bst_itr_t it2);
 
 #endif

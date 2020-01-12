@@ -62,13 +62,13 @@ int StackPush(stack_t* mystack, const void* data)
 	{
 		printf("the stack is full, didnt add.\n");
 
-		return 0;
+		return 1;
 	}
 
-	memcpy(mystack->current, data, mystack->element_size);
+	memmove(mystack->current, data, mystack->element_size);
 	mystack->current = (char *)mystack->current + mystack->element_size;
 
-	return 1;
+	return 0;
 }
 
 /* This function pops the element that is on the top of the Stack and removes it */
@@ -92,7 +92,6 @@ int StackIsEmpty(const stack_t* mystack)
 	assert(NULL != mystack);
 
 	return (mystack->current == mystack->start);
-	
 }
 
 /* This function return the number of elements in the stack */

@@ -1,10 +1,21 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
+/*********************************/
+/*   BST                         */
+/*   Yoav Hattav                 */
+/*   Last Updated 09/01/20       */
+/*   Reviewed by: Israel         */
+/*********************************/
 
-#include "../include/bst.h"
+#include <stdio.h>  /* sizeof */
+#include <stdlib.h> /* malloc */
+#include <assert.h> /* assert */
+
+#include "../include/bst.h"    /* API */
 
 #define END_DATA 0xDEADBEEF
+
+enum Bool {FALSE, TRUE};
+enum Side {LEFT, RIGHT};
+enum State {SUCC, FAIL};
 
 typedef struct BSTNode bst_node_t;
 
@@ -12,7 +23,7 @@ struct BSTNode
 {
 	void *data;
 	struct BSTNode *child[2];
-	struct BSTNode parent;
+	struct BSTNode *parent;
 };
 
 struct BSTree
@@ -22,25 +33,17 @@ struct BSTree
 	void *param;
 };
 
-
-
-
-
 static int WhichChild(bst_itr_t itr)
 {
+	assert(NULL != itr);
 
+	return (itr->parent->child[LEFT] != itr);
 }
 
-/*********************************************** 
-    Returns a pointer to the BST data structure
-	Complexity of malloc     
- ***********************************************/
 bst_t *BSTCreate(compare_func_t cmp, void *param)
 {
 	bst_t *tree = NULL;
-	bst_node_t *dummy = NULL;
 
-	assert(NULL != param);
 	assert(NULL != cmp);
 
 	tree = (bst_t *)malloc(sizeof(bst_t));
@@ -52,19 +55,14 @@ bst_t *BSTCreate(compare_func_t cmp, void *param)
 	tree->cmp = cmp;
 	tree->param = param;
 
-	tree->dummy.data = (void *)0xDEADBEEF;
+	tree->dummy.data = (void *)END_DATA;
 	tree->dummy.child[LEFT] = NULL;
 	tree->dummy.child[RIGHT] = NULL;
 	tree->dummy.parent = NULL;
 
 	return tree;
 }
-/*userdata > data2*/
 
-/************************************************** 
-	Destroys the DLL data and free it from memory 
-	Complexity of free                            
- **************************************************/
 void BSTDestroy(bst_t *tree)
 {
 	bst_itr_t itr = NULL;
@@ -87,65 +85,129 @@ void BSTDestroy(bst_t *tree)
 				itr = itr->child[RIGHT];
 			}
 		}
-		WhichChild() = side;
+		side = WhichChild(itr);
 		itr = itr->parent;
 		free(itr->child[side]); itr->child[side] = NULL;
 	}
+	free(tree); tree = NULL;
 }
 
-/********************************************************************* 
-	Gets a pointer to the tree and insert new data in the right place  
-	Return 0 for success, otherwise: 1
-	Complexity of malloc + O(log(n))                            
- ********************************************************************/
 int BSTInsert(bst_t *tree, void *data)
 {
-
-}
-
-/*********************************************** 
-	Get an iterator to remove from the tree
-	Complexity: O(1)
- ***********************************************/
-void BSTRemove(bst_itr_t it)
-{
-
-}
-
-/*********************************************************************** 
-	Gets a pointer to the tree and search if the data exist in the tree
-	Returns an iterator to the data if it was found, otherwise: NULL
-	Complexity: avg-case: O(log(n)), worst-case: O(n)
- ***********************************************************************/
-bst_itr_t BSTFind(const bst_t *tree, const void *data)
-{
-	bst_itr_t itr = NULL;
+	bst_itr_t node_ptr = NULL;
+	bst_itr_t connect_to_itr = NULL;
+	int default_side = LEFT;
 
 	assert(NULL != tree);
 	assert(NULL != data);
 
-	itr = tree->dummy.child[LEFT];
-	while (itr->data != *data && (itr->child[LEFT] != NULL && itr->child[RIGHT] != NULL))
+	node_ptr = (bst_itr_t)malloc(sizeof(bst_node_t));
+	if (NULL == node_ptr)
 	{
-		itr = itr->child[tree->cmp(data, itr->data)]
+		return FAIL;
+	}
+	
+	connect_to_itr = (bst_itr_t)&tree->dummy;
+
+	if (TRUE != BSTIsEmpty(tree))
+	{
+		connect_to_itr = tree->dummy.child[LEFT];
+		while (NULL != connect_to_itr->child[tree->cmp(data, connect_to_itr->data, NULL)])
+		{
+			connect_to_itr = connect_to_itr->child[tree->cmp(data, connect_to_itr->data, NULL)];
+		}
+		default_side = tree->cmp(data, connect_to_itr->data, NULL);
 	}
 
-	return (itr->data == *data == *data ? itr : NULL);
+	connect_to_itr->child[default_side] = node_ptr;
+
+	node_ptr->data = data;
+	node_ptr->child[RIGHT] = NULL;
+	node_ptr->child[LEFT] = NULL;
+	node_ptr->parent = connect_to_itr;
+
+	return SUCC;
 }
 
-/********************************************************************************** 
-	Gets iterators to the start and the end,
-		 action function to operate on the elements in the tree
-	Returns 0 for success, otherwise: non-zero value
-	Complexity: worst-case: O(n) 
- ***********************************************************************************/
-int BSTForeach(bst_itr_t start, bst_itr_t end, action_func_ptr action, void *param);
+void BSTRemove(bst_itr_t it)
+{
+	bst_itr_t successor_it = NULL;
 
-/*********************************************** 
-	Gets a pointer to the tree
-	Returns the size of the tree
-	complexity: O(n)                  
- ***********************************************/
+	assert(NULL != it);
+
+	if (NULL != it->child[LEFT] && NULL != it->child[RIGHT])
+	{
+		successor_it = BSTNext(it);
+		it->parent->child[WhichChild(it)] = it->child[RIGHT];
+		it->child[RIGHT]->parent = it->parent;
+
+		it->child[LEFT]->parent = successor_it;
+		successor_it->child[LEFT] = it->child[LEFT]; 
+	}
+	else if (NULL != it->child[LEFT] || NULL != it->child[RIGHT])
+	{
+		if (NULL != it->child[LEFT])
+		{
+			it->parent->child[WhichChild(it)] = it->child[LEFT];
+			it->child[LEFT]->parent = it->parent;
+		}
+		else
+		{
+			it->parent->child[WhichChild(it)] = it->child[RIGHT];
+			it->child[RIGHT]->parent = it->parent;
+		}
+	}
+	else
+	{
+		it->parent->child[WhichChild(it)] = NULL;
+	}
+
+	free(it); it = NULL;
+}
+
+bst_itr_t BSTFind(const bst_t *tree, const void *data)
+{
+    int direction = 0;    
+    bst_itr_t it = NULL;
+   
+    assert(NULL != tree);
+   
+    it = &((bst_t *)tree)->dummy;
+     
+    while (NULL != it->child[direction])
+    {  
+        it = it->child[direction];
+        direction = tree->cmp(data, it->data, tree->param);
+   
+        if ((0 == direction) && (0 == tree->cmp(it->data, data, tree->param)))
+        {
+            return it;
+        }
+    }
+   
+    return BSTEnd(tree);
+}
+
+int BSTForeach(bst_itr_t start, bst_itr_t end, action_func_t action, void *param)
+{
+	bst_itr_t itr = NULL;
+
+	assert(NULL != start);
+	assert(NULL != end);
+	assert(NULL != action);
+
+	itr = start;
+	for ( ; itr != end ; itr = BSTNext(itr))
+	{
+		if (SUCC != action(itr->data, param))
+		{
+			return FAIL;
+		}
+	}
+
+	return SUCC;
+}
+
 size_t BSTSize(const bst_t *tree)
 {
 	bst_itr_t itr = NULL;
@@ -154,18 +216,15 @@ size_t BSTSize(const bst_t *tree)
 	assert(NULL != tree);
 
 	itr = BSTBegin(tree);
-	while (0xDEADBEEF)
+	while (NULL != itr->parent)
 	{
-
+		++size;
+		itr = BSTNext(itr);
 	}
 
+	return size;
 }
 
-/*********************************************** 
-	Gets a pointer to the tree
-	Returns 1 if empty, otherwise: 0
-	Complexity: O(1)
- ***********************************************/
 int BSTIsEmpty(const bst_t *tree)
 {
 	assert(NULL != tree);
@@ -173,30 +232,20 @@ int BSTIsEmpty(const bst_t *tree)
 	return (tree->dummy.child[LEFT] == tree->dummy.child[RIGHT]);
 }
 
-/*********************************************** 
-	Gets an iterator 
-	Returns the data it contains
-	complexity: O(1)                       
- ***********************************************/
-void *BSTGetData(const bst_itr_t it)
+void *BSTGetData(bst_itr_t it)
 {
 	assert(NULL != it);
 
 	return it->data;
 }
 
-/***************************************************** 
-	Gets pointer to the tree
-	Returns the first element in the tree
-	Complexity: avg-case: O(log(n)), worst-case: O(n)
- *****************************************************/
 bst_itr_t BSTBegin(const bst_t *tree)
 {
 	bst_itr_t itr = NULL;
 
 	assert(NULL != tree);
 
-	itr = tree->dummy.child[LEFT];
+	itr = (bst_itr_t)&tree->dummy;
 	while (NULL != itr->child[LEFT])
 	{
 		itr = itr->child[LEFT];
@@ -205,11 +254,6 @@ bst_itr_t BSTBegin(const bst_t *tree)
 	return itr;
 }
 
-/***************************************************** 
-	Gets pointer to the tree
-	Returns the last element in the tree
-	Complexity: avg-case: O(log(n)), worst-case: O(n)
- *****************************************************/
 bst_itr_t BSTEnd(const bst_t *tree)
 {
 	assert(NULL != tree);
@@ -217,11 +261,6 @@ bst_itr_t BSTEnd(const bst_t *tree)
 	return (bst_itr_t)&(tree->dummy);
 }
 
-/******************************************************* 
-	Gets an iterator
-	Returns an iterator to the next element in the tree
-	Complexity: O(1)
- *******************************************************/
 bst_itr_t BSTNext(bst_itr_t it)
 {
 	assert(NULL != it);
@@ -233,23 +272,19 @@ bst_itr_t BSTNext(bst_itr_t it)
 		{
 			it = it->child[LEFT];
 		}
-		return it;
 	}
-	
-	while (RIGHT == WhichChild(it))
+	else
 	{
+		while (RIGHT == WhichChild(it))
+		{
+			it = it->parent;
+		}
 		it = it->parent;
 	}
-	it = it->parent;
-	
+
 	return it;	
 }
 
-/******************************************************* 
-	Gets an iterator
-	Returns an iterator to the previous element in the tree
-	Complexity: O(1)
- *******************************************************/
 bst_itr_t BSTPrev(bst_itr_t it)
 {
 	assert(NULL != it);
@@ -261,24 +296,21 @@ bst_itr_t BSTPrev(bst_itr_t it)
 		{
 			it = it->child[RIGHT];
 		}
-		return it;
 	}
 	
-	while (LEFT == WhichChild(it))
+	else
 	{
+		while (NULL != it->parent->parent && LEFT == WhichChild(it))
+		{
+			it = it->parent;
+		}
 		it = it->parent;
 	}
-	it = it->parent;
 	
 	return it;
 }
 
-/******************************************************* 
-	Gets 2 iterators
-	Returns 1 if they are equal, otherwise: 0
-	Complexity: O(1)
- *******************************************************/
-int BSTIsSameItr(const bst_itr_t it1, const bst_itr_t it2)
+int BSTIsSameItr(bst_itr_t it1, bst_itr_t it2)
 {
 	assert(NULL != it1);
 	assert(NULL != it2);
