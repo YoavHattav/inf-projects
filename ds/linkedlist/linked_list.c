@@ -10,7 +10,7 @@
 #include <stdlib.h> /* malloc */
 #include <assert.h> /* assert */
 
-#include "linkedlist.h" /* linked list functions */
+#include "linked_list.h" /* linked list functions */
 
 #define FREE(ptr) free(ptr); ptr = NULL;
                  
@@ -193,6 +193,39 @@ node_t *SLLFlip(node_t *head)
 	}
 
 	return previous;
+}
+
+node_t *SLLRecFlip(node_t *head)
+{
+	node_t *new_head = NULL;
+
+	if (NULL == head->next)
+	{
+		return head;
+	}
+
+	new_head = SLLRecFlip(head->next);
+
+	head->next->next = head;
+	head->next = NULL;
+
+	return new_head;
+}
+
+
+char *StrcatRec(char *dest, const char *src)
+{
+	if (*dest != '\0')
+	{
+		StrcatRec(dest + 1 , src);
+	}
+
+	else if ((*dest = *src) != '\0')
+	{
+		StrcatRec(dest + 1 , src + 1);
+	}
+
+	return dest;
 }
 
 /* Checks if a loop occurs in the structure */

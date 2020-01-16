@@ -5,7 +5,7 @@
 
 #include <stdio.h> /* printf */
 
-#include "linkedlist.h"
+#include "linked_list.h"
 
 #define UNUSED(x) (void)(x)
 #define GREEN "\033[;032m"

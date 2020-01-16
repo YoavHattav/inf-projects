@@ -14,8 +14,8 @@
 #define END_DATA 0xDEADBEEF
 
 enum Bool {FALSE, TRUE};
-enum Side {LEFT, RIGHT};
-enum State {SUCC, FAIL};
+enum Children {LEFT, RIGHT};
+enum Status {SUCC, FAIL};
 
 typedef struct BSTNode bst_node_t;
 

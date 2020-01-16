@@ -5,7 +5,7 @@ typedef enum Status{
                 SUCCESS,
                 SYNTAX_ERROR,
                 MEMORY_FAIL
-           } calc_status_t;
+           		}calc_status_t;
 
 /*
     Gets an expression as string to calculate and a pointer to the result
