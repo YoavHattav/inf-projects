@@ -1,3 +1,5 @@
+#include <assert.h>
+#include <stdlib.h>
 #include "../include/avl.h"
 
 
@@ -9,7 +11,7 @@ struct AVLNode
 {
 	void *data;
 	struct AVLNode *child[2];
-	size_t hight;
+	size_t height;
 };
 
 struct AVLTree
@@ -34,11 +36,11 @@ avl_t *AVLCreate(compare_func_t cmp)
 	return tree;
 }
 
-static avl_node_t RecDestroy(avl_node_t *root)
+static void RecDestroy(avl_node_t *root)
 {
-	if (0 == root->hight)
+	if (NULL == root)
 	{
-		return root;
+		return;
 	}
 	RecDestroy(root->child[LEFT]);
 	RecDestroy(root->child[RIGHT]);
@@ -59,19 +61,20 @@ static avl_node_t *AVLBalance(avl_t *tree)
 }
 #endif
 
-static int CreateNode(void *data)
+static avl_node_t *CreateNode(void *data)
 {
 	avl_node_t *new_node = NULL;
 
 	assert(NULL != data);
 
 	new_node = malloc(sizeof(*new_node));
+
 	if (NULL != new_node)
 	{
 		new_node->data = data;
 		new_node->child[LEFT] = NULL;
-		new_node->chil[RIGHT] = NULL;
-		new_node->hight = 0;
+		new_node->child[RIGHT] = NULL;
+		new_node->height = 0;
 	}
 
 	return new_node;
@@ -79,23 +82,23 @@ static int CreateNode(void *data)
 
 static void RecInsert(avl_node_t *root, compare_func_t cmp, avl_node_t *node)
 {
-	int side = 0;
+	int side = LEFT;
 
 	assert(NULL != root);
 	assert(NULL != node);
 	assert(NULL != cmp);
 
 	side = cmp(node->data, root->data);
-	side = (side == 1);
+	side = (side == RIGHT);
 
 	if (NULL == root->child[side])
 	{
 		root->child[side] = node;
 
-		return SUCC;
+		return;
 	}
 
-	RecInsert(root->child[cmp(node->data, root->data)], cmp, node);
+	RecInsert(root->child[side], cmp, node);
 
 	return;
 }
@@ -108,16 +111,23 @@ int AVLInsert(avl_t *tree, void *data)
 	assert(NULL != data);
 
 	new_node = CreateNode(data);
-	if (NULL != new_node)
+	if (NULL == new_node)
 	{
 		return FAIL;
 	}
-	if ()
-	RecInsert(tree->root, tree->cmp, new_node);
 
-	#ifndef NDEBUG
-	AVLBalance(tree);
-	#endif
+	if (NULL != tree->root)
+	{
+		RecInsert(tree->root, tree->cmp, new_node);
+
+		#ifndef NDEBUG
+		AVLBalance(tree);
+		#endif
+
+		return SUCC;
+	}
+	
+	tree->root = new_node;
 
 	return SUCC;
 }
@@ -127,27 +137,27 @@ void AVLRemove(avl_t *tree, const void *data)
 
 }
 
-static void *RecFind(avl_node_t *root, compare_func_t cmp, void *data)
+static avl_node_t *RecFind(avl_node_t *root, compare_func_t cmp, void *data)
 {
-	int side = 0;
+	int side = LEFT;
 
 	assert(NULL != root);
-	assert(NULL != node);
+	assert(NULL != data);
 	assert(NULL != cmp);
 
-	side = cmp(node->data, root->data);
-	side = (side == 1);
-	if (0 == cmp(root->data, data))
+	side = cmp(data, root->data);
+	side = (side == RIGHT);
+	if (0 == side)
 	{
 		return root;
 	}
 
-	return RecFind(root->child[cmp(root->data, data)], cmp, data);
+	return RecFind(root->child[side], cmp, data);
 }
 
 void *AVLFind(const avl_t *tree, const void *data)
 {
-	return (RecFind(tree->root, tree->cmp, data))->data;
+	return (RecFind(tree->root, tree->cmp, (void *)data))->data;
 }
 
 static int RecForEach(avl_node_t *root, action_ptr_t action, void *param)
@@ -159,9 +169,9 @@ static int RecForEach(avl_node_t *root, action_ptr_t action, void *param)
 		return SUCC;
 	}
 
-	result += RecForEach(root->child[LEFT]);
-	result += action(root->data, void *param);
-	result += RecForEach(root->child[RIGHT]);
+	result += RecForEach(root->child[LEFT], action, param);
+	result += action(root->data, param);
+	result += RecForEach(root->child[RIGHT], action, param);
 
 	return result;
 }
@@ -170,7 +180,6 @@ int AVLForeach(avl_t *tree, action_ptr_t action, void *param)
 {
 	assert(tree);
 	assert(action);
-	assert(param);
 
 	return RecForEach(tree->root, action, param);
 }
