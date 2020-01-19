@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include "../include/avl.h"
 
-
 enum Bool {FALSE, TRUE};
 enum Children {LEFT, RIGHT};
 enum Status {SUCC, FAIL};
@@ -80,6 +79,40 @@ static avl_node_t *CreateNode(void *data)
 	return new_node;
 }
 
+static void UpdateHighet(avl_node_t *subtree)
+{
+	if ((NULL != subtree->child[LEFT]) && (NULL != subtree->child[RIGHT]))
+	{
+		subtree->height = subtree->child[RIGHT]->height - subtree->child[LEFT]->height;
+		if (subtree->height < 0)
+		{
+			subtree->height *= -1;
+			subtree->height += 1;
+		}
+
+	return;
+	}
+
+	if ((NULL == subtree->child[LEFT]) && (NULL != subtree->child[RIGHT]))
+	{
+		subtree->height = subtree->child[RIGHT]->height + 1;
+		return;
+	}
+
+	if ((NULL != subtree->child[LEFT]) && (NULL == subtree->child[RIGHT]))
+	{
+		subtree->height = subtree->child[LEFT]->height + 1;
+		return;
+	}
+
+	if ((NULL == subtree->child[LEFT]) && (NULL == subtree->child[RIGHT]))
+	{
+		subtree->height = 0;
+		return;
+	}
+}
+
+
 static void RecInsert(avl_node_t *root, compare_func_t cmp, avl_node_t *node)
 {
 	int side = LEFT;
@@ -94,11 +127,14 @@ static void RecInsert(avl_node_t *root, compare_func_t cmp, avl_node_t *node)
 	if (NULL == root->child[side])
 	{
 		root->child[side] = node;
-
+		node->height = 0;
+		UpdateHighet(root);
 		return;
 	}
 
 	RecInsert(root->child[side], cmp, node);
+	
+	UpdateHighet(root);
 
 	return;
 }
@@ -120,10 +156,6 @@ int AVLInsert(avl_t *tree, void *data)
 	{
 		RecInsert(tree->root, tree->cmp, new_node);
 
-		#ifndef NDEBUG
-		AVLBalance(tree);
-		#endif
-
 		return SUCC;
 	}
 	
@@ -132,9 +164,76 @@ int AVLInsert(avl_t *tree, void *data)
 	return SUCC;
 }
 
+static avl_node_t *FindSuccessor(avl_node_t *node)
+{
+	if (NULL == node->child[LEFT]->child[LEFT])
+	{
+		avl_node_t *successor = node->child[LEFT];
+		node->child[LEFT] = node->child[LEFT]->child[RIGHT];
+		return successor;
+	}
+
+	return FindSuccessor(node->child[LEFT]);
+}
+
+static avl_node_t *FindReplacemant(avl_node_t *node)
+{
+	if (NULL != node->child[RIGHT])
+	{
+		if (NULL != node->child[LEFT])
+		{
+			avl_node_t *successor = NULL;
+			if (NULL == node->child[RIGHT]->child[LEFT])
+			{
+				successor = node->child[RIGHT];
+			}
+
+			else
+			{
+				successor = FindSuccessor(node->child[RIGHT]);
+			}
+			
+			if (node->child[RIGHT] != successor)
+			{
+				successor->child[RIGHT] = node->child[RIGHT];
+			}
+
+			successor->child[LEFT] = node->child[LEFT];
+			return successor;
+		}
+
+		return node->child[RIGHT];
+	}
+
+	return node->child[LEFT];
+}
+
+static avl_node_t *RecRemove(avl_node_t *node, compare_func_t cmp, const void *data)
+{
+	avl_node_t *new_node = NULL;
+	int side = cmp(data, node->data);
+	side = (side == RIGHT);
+
+	if (NULL == node)
+	{
+		return NULL;
+	}
+
+	else if (0 == cmp(data, node->data))
+	{
+		new_node = FindReplacemant(node);
+		free(node);
+		return new_node;
+	}
+
+	node->child[side] = RecRemove(node->child[side], cmp, data);
+
+	return node;
+}
+
 void AVLRemove(avl_t *tree, const void *data)
 {
-
+	tree->root = RecRemove(tree->root, tree->cmp, data);
 }
 
 static avl_node_t *RecFind(avl_node_t *root, compare_func_t cmp, void *data)
@@ -210,6 +309,6 @@ int AVLIsEmpty(const avl_t *tree)
 
 size_t AVLGetHeight(const avl_t *tree)
 {
-
+	return tree->root->height;	
 }
 
