@@ -34,4 +34,7 @@ size_t StackSize(const stack_t* mystack);
 /* This function returns the top most elemet on the Stack */
 void* StackPeek(const stack_t* mystack);
 
+void StackSortRec(stack_t *stack);
+
+
 #endif

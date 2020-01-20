@@ -30,7 +30,7 @@ stack_t* StackCreate(size_t element_size, size_t capacity)
 		return NULL;
 	}
 
-	newstack->start = (void *) malloc(capacity*element_size);
+	newstack->start = (void *) malloc(capacity * element_size);
 	if (NULL == newstack->start)
 	{
 		return NULL;
@@ -115,4 +115,40 @@ void* StackPeek(const stack_t* mystack)
 	}
 
 	return ((char *)mystack->current - mystack->element_size);
+}
+
+void StackSortRec(stack_t *stack)
+{
+	int first_holder = 0;
+	int second_holder = 0;
+
+	if (StackIsEmpty(stack))
+	{	
+		return;
+	}
+
+	if (1 == StackSize(stack))
+	{
+		return;
+	}
+
+	first_holder = *(int *)StackPeek(stack);
+	StackPop(stack);
+
+	StackSortRec(stack);
+
+	if (first_holder < *(int *)StackPeek(stack))
+	{
+		second_holder = *(int *)StackPeek(stack);
+		StackPop(stack);
+		StackPush(stack, &first_holder);
+
+		StackSortRec(stack);
+
+		StackPush(stack, &second_holder);	
+	}
+	else
+	{
+		StackPush(stack, &first_holder);
+	}
 }

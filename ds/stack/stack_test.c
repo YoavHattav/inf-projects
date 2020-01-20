@@ -44,12 +44,12 @@ void Test()
 	RUN_TEST(((size_t)new_stack1->end - (size_t)new_stack1->start == 80 ),
 											 "stack size diff then expectation");	
 	printf(NRM"StackPush Tests\n");
-	RUN_TEST((StackPush(new_stack1,data) == 1), "1can't push normal value");	
+	RUN_TEST((StackPush(new_stack1,data) == 0), "1can't push normal value");	
 	
 	RUN_TEST(((size_t)new_stack1->current - (size_t)new_stack1->start == 4 ),	
 												"1adress delta not as expected");
 	new_stack2 = StackCreate(10,20);
-	RUN_TEST((StackPush(new_stack2,"123456789") == 1), "can't push string value");	
+	RUN_TEST((StackPush(new_stack2,"123456789") == 0), "can't push string value");	
 	RUN_TEST(((size_t)new_stack2->current - (size_t)new_stack2->start == 10 ),	
 								"adress delta not as expected for string size");
 	/*uncomment only if you want the assert to fail!
@@ -59,7 +59,7 @@ void Test()
 
 	for (; i < 19; ++i)
 	{
-		RUN_TEST(StackPush(new_stack2,"123456789"),"could not push");
+		RUN_TEST(StackPush(new_stack2,"123456789") == 0,"could not push");
 		RUN_TEST((StackSize(new_stack2) == i+2), "Wrong # of item");
 		RUN_TEST(!(strcmp((char*)StackPeek(new_stack2),"123456789")),"Peek Value not expected for ");	
 	}
@@ -67,7 +67,7 @@ void Test()
 	printf(NRM"Full Stack Tests\n");
 	RUN_TEST(((size_t)new_stack2->current - (size_t)new_stack2->start == 200 ),	
 						"FullStack adress delta not as expected for string size");
-	RUN_TEST((StackPush(new_stack2,"123456789") == 0),
+	RUN_TEST((StackPush(new_stack2,"123456789") == 1),
 											 "dosen't fail when stack is full");
 	printf(NRM"IsEmpty Tests\n");
 	RUN_TEST((StackIsEmpty(new_stack2) == 0), 
@@ -94,9 +94,36 @@ void Test()
 
 }
 
+void TestSort()
+{
+
+	stack_t *new_stack1 = 0, *new_stack2 = 0;
+	int x3 = 3, x4 = 4, x5 = 5;
+	printf(NRM"Sort\n");
+
+	new_stack1 = StackCreate(4, 20);
+
+	RUN_TEST((StackPush(new_stack1,&x5) == 0), "1can't push normal value");
+	RUN_TEST((StackPush(new_stack1,&x4) == 0), "1can't push normal value");	
+	RUN_TEST((StackPush(new_stack1,&x3) == 0), "1can't push normal value");	
+
+	StackSortRec(new_stack1);
+
+	printf("%d\n", *(int *)StackPeek(new_stack1));
+	StackPop(new_stack1);
+	printf("%d\n", *(int *)StackPeek(new_stack1));	
+	StackPop(new_stack1);
+	printf("%d\n", *(int *)StackPeek(new_stack1));	
+
+
+	StackDestroy(new_stack1);
+
+}
+
 int main()
 {
 	Test();
+	TestSort();
 
 	return 0;
 }

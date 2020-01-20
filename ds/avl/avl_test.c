@@ -1,280 +1,243 @@
+/************************************************
+*
+* File: avl_test.c
+* Ex: AVL tree
+* writer: Israel Drayfus
+* Description: Run and test functions of AVL tree.
+*
+*************************************************/
 #include <stdio.h>
-
-#include "../include/avl.h"
+#include "avl.h"
 
 #define GREEN "\033[;032m"
 #define RED   "\033[;031m"
 #define RESET "\033[0m"
-#define UNUSED(x) (void)(x)
-#define RUN_TEST(test)\
+#define TEST(test, msg)\
 {\
   if(test)\
   {\
     printf(GREEN);\
-    printf("SUCCESS\n");\
+    printf("SUCCESS- %s\n", msg);\
     printf(RESET);\
   }\
   else\
   {\
     printf(RED);\
-    printf("FAIL \n");\
+    printf("FAIL - %s \n", msg);\
     printf(RESET);\
   }\
 }
 
-static int Compare(const void *user_data, const void *data)
+int CmpData(const void *data1, const void *data2)
 {
-    
-    if (*(int *)user_data > *(int *)data)
-    {
-    	return 1;
-    }
-    if (*(int *)user_data == *(int *)data)
-    {
-    	return 0;
-    }
-    else 
-    {
-    	return -1;
-    }
+	return *(int *)data1 - *(int *)data2;
 }
 
-static int AddNum(void *node_data, void *num)
+int AddOne(void *tree_data, void *param)
 {
-    *(int *)node_data += *(int *)num;
-    
-    return 0;
-}
-
-static int PrintTree(void *node_data, void *param)
-{
-    UNUSED(param);
-    
-    printf("%d\n", *(int *)node_data);
-    
-    return 0;
-}
-
-void TestCreate()
-{
-	avl_t *tree = AVLCreate(&Compare);
-    
-    printf("Create:\n");
-    RUN_TEST(0 == AVLSize(tree));
-    RUN_TEST(1 == AVLIsEmpty(tree));
-    
-    AVLDestroy(tree); tree = NULL;
-}
-
-static void TestInsert()
-{
-    avl_t *tree = AVLCreate(&Compare);
-    int x1 = 1, x2 = 2, x3 = 3, x4 = 4, x5 = 5, x6 = 6, x7 = 7; 
-    
-    printf("\nInsert:\n");
-    RUN_TEST(0 == AVLSize(tree));
-    RUN_TEST(1 == AVLIsEmpty(tree));
-    
-    RUN_TEST(0 == AVLInsert(tree, &x4));
-    RUN_TEST(0 == AVLInsert(tree, &x5));
-    RUN_TEST(0 == AVLInsert(tree, &x3));
-    RUN_TEST(0 == AVLInsert(tree, &x1));
-    RUN_TEST(0 == AVLInsert(tree, &x2));
-    RUN_TEST(0 == AVLInsert(tree, &x6));
-    RUN_TEST(0 == AVLInsert(tree, &x7));
-    
-    RUN_TEST(7 == AVLSize(tree));
-    
-    AVLDestroy(tree); tree = NULL; 
-}
-
-static void TestFind()
-{
-	avl_t *tree = AVLCreate(&Compare);
-    int x1 = 1, x2 = 2, x3 = 3, x4 = 4, x5 = 5, x6 = 6, x7 = 7, x10 = 10; 
-    
-    printf("\nFind , ForEach:\n");
-    RUN_TEST(0 == AVLSize(tree));
-    RUN_TEST(1 == AVLIsEmpty(tree));
-    
-    RUN_TEST(0 == AVLInsert(tree, &x1));
-    RUN_TEST(0 == AVLInsert(tree, &x2));
-    RUN_TEST(0 == AVLInsert(tree, &x4));
-    RUN_TEST(0 == AVLInsert(tree, &x6));
-    RUN_TEST(0 == AVLInsert(tree, &x7));
-    
-    RUN_TEST(5 == AVLSize(tree));
-
-    printf("\nBefore Add Number:\n");
-
-    RUN_TEST(0 == AVLForeach(tree, &PrintTree, NULL));
-    
-    RUN_TEST(0 == AVLForeach(tree, &AddNum, &x3));
-
-    printf("\nAfter Add Number:\n");
-    
-    RUN_TEST(0 == AVLForeach(tree, &PrintTree, NULL));
-
-    RUN_TEST(10 == *(int *)AVLFind(tree, &x10));
-
-    AVLDestroy(tree); tree = NULL;	
-}
-
-static void TestRemove()
-{
-	avl_t *tree = AVLCreate(&Compare);
-    int x1 = 1, x2 = 2, x3 = 3, x4 = 4, x5 = 5, x6 = 6, x7 = 7; 
-    
-    printf("\nRemove:\n");
-    RUN_TEST(0 == AVLSize(tree));
-    RUN_TEST(1 == AVLIsEmpty(tree));
-    
-    AVLInsert(tree, &x4);
-    AVLInsert(tree, &x5);
-    AVLInsert(tree, &x3);
-
-    AVLRemove(tree, &x5);
-
-	RUN_TEST(2 == AVLSize(tree));
-    RUN_TEST(0 == AVLIsEmpty(tree));
-
-    AVLRemove(tree, &x3);
 	
-	RUN_TEST(1 == AVLSize(tree));
-    RUN_TEST(0 == AVLIsEmpty(tree));
-    
-    AVLDestroy(tree); tree = NULL; 
+	++*(int *)tree_data;
+	
+	return 0;
 }
 
-static void TestRemoveRoot()
+int AddOne2(void *tree_data, void *param)
 {
-	avl_t *tree = AVLCreate(&Compare);
-    int x1 = 1, x2 = 2, x3 = 3, x4 = 4, x5 = 5, x6 = 6, x7 = 7; 
-    
-    printf("\nRemove-Root:\n");
-    
-    AVLInsert(tree, &x4);
-
-    AVLRemove(tree, &x4);
-
-	RUN_TEST(0 == AVLSize(tree));
-    RUN_TEST(1 == AVLIsEmpty(tree));
-
-    AVLDestroy(tree); tree = NULL; 
+	
+	if ( 50 < *(int *)tree_data)
+	{
+		return 1;
+	}
+	
+	++*(int *)tree_data;
+	
+	return 0;
 }
 
-static void TestSpecialPlace()
+int PrintTree(void *tree_data, void *param)
 {
-	avl_t *tree = AVLCreate(&Compare);
-    int x8 = 8, x9 = 9, x13 = 13, x20 = 20;
-    int x1 = 1, x2 = 2, x5 = 5, x7 = 7; 
- 
-    
-    printf("\nTestSpecialPlace:\n");
-    
-    AVLInsert(tree, &x7);
-    AVLInsert(tree, &x2);
-    AVLInsert(tree, &x13);
-    AVLInsert(tree, &x1);
-    AVLInsert(tree, &x5);
-    AVLInsert(tree, &x9);
-    AVLInsert(tree, &x8);
-    AVLInsert(tree, &x20);
-    
-    RUN_TEST(8 == AVLSize(tree));
-    RUN_TEST(0 == AVLIsEmpty(tree));
-
-    AVLRemove(tree, &x7);
-
-	RUN_TEST(7 == AVLSize(tree));
-	printf("%lu\n", AVLSize(tree));
-    RUN_TEST(0 == AVLIsEmpty(tree));
-
-    AVLDestroy(tree); tree = NULL; 
+	printf("%d ", *(int *)tree_data);
+	
+	return 0;
 }
 
-static void TestDanielStupidTest()
+void Test1()
 {
-	avl_t *tree = AVLCreate(&Compare);
-    int x5 = 150, x6 = 25, x7 = 80, x8 = 70, x9 = 60, x10 = 65, x11 = 140, x12 = 135 , x13= 138;
-    int x1 = 100, x2 = 50, x3 = 200, x4 = 300; 
- 
-    
-    printf("\nyyiuyy:\n");
-    
-    AVLInsert(tree, &x1);
-    AVLInsert(tree, &x2);
-    AVLInsert(tree, &x3);
-    AVLInsert(tree, &x4);
-    AVLInsert(tree, &x5);
-    AVLInsert(tree, &x6);
-    AVLInsert(tree, &x7);
-    AVLInsert(tree, &x8);
-    AVLInsert(tree, &x9);
-    AVLInsert(tree, &x10);
-    AVLInsert(tree, &x11);
-    AVLInsert(tree, &x12);
-    AVLInsert(tree, &x13);
-        
-    RUN_TEST(13 == AVLSize(tree));
-    RUN_TEST(0 == AVLIsEmpty(tree));
-
-    AVLRemove(tree, &x13);
-
-	RUN_TEST(12 == AVLSize(tree));
-    RUN_TEST(0 == AVLIsEmpty(tree));
-
-    AVLDestroy(tree); tree = NULL; 
+	int one = 1, two = 2;
+	
+	avl_t *tree = AVLCreate(CmpData);
+	TEST(AVLSize(tree) == 0, "Size(), empty tree");
+	TEST(AVLIsEmpty(tree) == 1, "IsEmpty(), empty tree");
+	AVLDestroy(tree);
+	
+	tree = AVLCreate(CmpData);
+	AVLInsert(tree, &one);
+	TEST(AVLSize(tree) == 1, "Size(), one item int tree");
+	TEST(AVLIsEmpty(tree) == 0, "IsEmpty(), one item int tree");
+	TEST(AVLFind(tree, &one) == &one, "Find(), True");
+	TEST(AVLFind(tree, &two) == NULL, "Find(), False");
+	AVLForeach(tree, AddOne, NULL);
+	TEST(one == 2, "Foreach()");
+	one = 1;
+	/*
+	AVLRemove(tree, &two);
+	*/
+	TEST(AVLIsEmpty(tree) == 0, "Remove(), item not found");
+	AVLRemove(tree, &one);
+	TEST(AVLIsEmpty(tree) == 1, "Remove(), item found");
+	AVLDestroy(tree);
+	printf("\n");
 }
 
-static void TestHeight()
+void Test2()
 {
-	avl_t *tree = AVLCreate(&Compare);
-    int x5 = 150, x6 = 25, x7 = 80, x8 = 70, x9 = 60, x10 = 65, x11 = 140, x12 = 135 , x13= 138;
-    int x1 = 100, x2 = 50, x3 = 200, x4 = 300; 
- 
-    
-    printf("\nheight:\n");
-    
-    AVLInsert(tree, &x1);
-    AVLInsert(tree, &x2);
-    AVLInsert(tree, &x3);
-    AVLInsert(tree, &x4);
-    AVLInsert(tree, &x5);
-    AVLInsert(tree, &x6);
-    AVLInsert(tree, &x7);
-    AVLInsert(tree, &x8);
-    AVLInsert(tree, &x9);
-    AVLInsert(tree, &x10);
-    AVLInsert(tree, &x11);
-    AVLInsert(tree, &x12);
-    AVLInsert(tree, &x13);
-        
-    RUN_TEST(13 == AVLSize(tree));
-    RUN_TEST(0 == AVLIsEmpty(tree));
+	int one = 1, two = 2, three = 3;
+	
+	avl_t *tree = AVLCreate(CmpData);
+	AVLInsert(tree, &one);
+	AVLInsert(tree, &two);
+	AVLInsert(tree, &three);
+	TEST(AVLSize(tree) == 3, "Size(), 3 items in tree");
+	TEST(AVLFind(tree, &two) == &two, "Find(), 3 items in tree");
+	AVLForeach(tree, AddOne, NULL);
+	TEST(three == 4, "Foreach()");
+	AVLRemove(tree, &two);
+	TEST(AVLSize(tree) == 2, "Remove(), 3 items in tree");
+	AVLDestroy(tree);
+	printf("\n");
+}
 
-    AVLRemove(tree, &x13);
+static void TestInsert(avl_t *tree, int *a, size_t size)
+{
+	size_t i = 0;
+	
+	for(; i < size; ++i)
+	{
+		AVLInsert(tree, &a[i]);
+	}
+}
 
-	RUN_TEST(12 == AVLSize(tree));
-    RUN_TEST(0 == AVLIsEmpty(tree));
+static void TestFind(avl_t *tree, int *a, size_t size)
+{
+	size_t i = 0;
+	
+	for(; i < size; ++i)
+	{
+		TEST(*(int *)AVLFind(tree, &a[i]) == a[i], "Find(), Test3, False");
+	}
+}
 
-    printf("%lu\n", AVLGetHeight(tree));
+static void PrintArray(int *a, size_t size)
+{
+	size_t i = 0;
+	
+	for (; i < size; ++i)
+	{
+		printf("%d ", a[i]);
+	}
+	printf("\n");
+}
 
+static void TestRemove(avl_t *tree, int *a, size_t size, size_t start)
+{
+	size_t i = 0;
+	
+	for (i = start; i < (size - start); ++i)
+	{
+		AVLRemove(tree, &a[i]);
+	}
+}
 
-    AVLDestroy(tree); tree = NULL; 
+void ArrInit(int *a, size_t size)
+{
+	size_t i = 0;
+	
+	for (; i < size; ++i)
+	{
+		a[i] = i;
+	}
+}
+
+void Test3()
+{
+	size_t size = 10;
+	int a[10] = {10,20,30,40,50,60,15,35,55,65};
+	avl_t *tree = AVLCreate(CmpData);
+	int zero = 0;
+
+	AVLInsert(tree, &a[2]);
+	AVLInsert(tree, &a[0]);
+	AVLInsert(tree, &a[1]);
+	AVLInsert(tree, &a[4]);
+	AVLInsert(tree, &a[3]);
+	AVLInsert(tree, &a[5]);
+	AVLInsert(tree, &a[6]);
+	AVLInsert(tree, &a[7]);
+	AVLInsert(tree, &a[8]);
+	AVLInsert(tree, &a[9]);
+
+	TEST(AVLSize(tree) == size, "Size(), Test3");
+	TEST(AVLFind(tree, &zero) == NULL, "Find(), Test3, False");
+	TestFind(tree, a, size);
+	PrintArray(a, size);
+	AVLForeach(tree, AddOne, NULL);
+	PrintArray(a, size);
+	AVLForeach(tree, AddOne2, NULL);
+	PrintArray(a, size);
+	TestRemove(tree, a, size, 0);
+	AVLDestroy(tree);
+	printf("\n");
+}
+
+void Test4()
+{
+	size_t size = 20;
+	int a[20];
+	avl_t *tree = AVLCreate(CmpData);
+	
+	ArrInit(a, size);
+	TestInsert(tree, a, size);
+	TEST(AVLSize(tree) == size, "Size(), 20 items in tree");
+	TEST(AVLGetHeight(tree) == 4, "Balance");
+	TestRemove(tree, a, size, 0);
+	AVLDestroy(tree);
+}
+
+void Test5()
+{
+	size_t size = 1000;
+	int a[1000];
+	avl_t *tree = AVLCreate(CmpData);
+	
+	ArrInit(a, size);
+	TestInsert(tree, a, size);
+	TEST(AVLSize(tree) == size, "Size(), 20 items in tree");
+	printf("%lu\n", AVLGetHeight(tree));
+	TEST(AVLGetHeight(tree) == 9, "Balance");
+	TestRemove(tree, a, size, 0);
+	printf("%lu\n", AVLGetHeight(tree));
+	TEST(AVLGetHeight(tree) == 0, "Balance");
+	AVLDestroy(tree);
 }
 
 int main()
 {
-	TestCreate();
-	TestInsert();
-	TestFind();
-	TestRemove();
-	TestRemoveRoot();
-	TestSpecialPlace();
-	TestDanielStupidTest();
-	TestHeight();
-
+	Test1();
+	Test2();
+	Test3();
+	Test4();
+	Test5();
 
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
