@@ -5,14 +5,17 @@
 
 #define NOT_NEEDED 0xDEADBEEF
 
-enum Bool {FALSE, TRUE};
-enum Children {LEFT, RIGHT};
-enum Status {SUCC, FAIL};
+#define FALSE 0
+#define TRUE 1
+#define SUCC 0
+#define FAIL 1
+
+enum Children {LEFT, RIGHT, NUM_OF_CHILDREN};
 
 struct AVLNode
 {
 	void *data;
-	struct AVLNode *child[2];
+	struct AVLNode *child[NUM_OF_CHILDREN];
 	size_t height;
 };
 
@@ -75,6 +78,16 @@ static avl_node_t *CreateNode(void *data)
 	return new_node;
 }
 
+static int NodeHeight(avl_node_t *node)
+{
+	if (NULL == node)
+	{
+		return -1;
+	}
+
+	return node->height;
+}
+
 static void UpdateHighet(avl_node_t *subtree)
 {
 	if ((NULL != subtree->child[LEFT]) && (NULL != subtree->child[RIGHT]))
@@ -118,16 +131,6 @@ static avl_node_t *SingleRotation(avl_node_t *root, int side)
 	UpdateHighet(new_root);
 
 	return new_root;
-}
-
-static int NodeHeight(avl_node_t *node)
-{
-	if (NULL == node)
-	{
-		return -1;
-	}
-
-	return node->height;
 }
 
 static int IsBalanceNeeded(avl_node_t *root)
@@ -287,7 +290,7 @@ static avl_node_t *RecRemove(avl_node_t *node, compare_func_t cmp, const void *d
 	else if (0 == cmp(data, node->data))
 	{
 		new_node = FindReplacemant(node);
-		free(node);
+		free(node);node = NULL:
 		return new_node;
 	}
 
@@ -333,9 +336,7 @@ void *AVLFind(const avl_t *tree, const void *data)
 	assert(NULL != tree);
 	assert(NULL != data);
 
-
 	result = RecFind(tree->root, tree->cmp, (void *)data);
-
 
 	if (NULL == result)
 	{

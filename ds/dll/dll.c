@@ -107,7 +107,6 @@ iterator_t DLLRemove(iterator_t it)
 	FREE(it_temp); 
 
 	return it;
-
 }
 
 int DLLIsEmpty(const dll_t *dll)

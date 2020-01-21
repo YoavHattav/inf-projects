@@ -1,5 +1,5 @@
 /*********************************/
-/*   BST                         */
+/*   calculator                  */
 /*   Yoav Hattav                 */
 /*   Last Updated 14/01/20       */
 /*   Reviewed by:   Israel       */
@@ -36,7 +36,7 @@ typedef struct State
 typedef struct Operator
 {
 	func_op_t op_func;
-	int presedence;
+	presedence_t presedence;
 }calc_op_t;
 
 struct Calc
@@ -399,11 +399,12 @@ calc_status_t CalcRun(const char *expression, calc_t *calc)
 		runner = calc->calc_lut[calc_status][runner_holder].handler(runner, calc);
 		calc_status = calc->calc_lut[calc_status][runner_holder].next_state;
 	}
+
 	if (ERROR == calc_status || WAIT_FOR_NUM == calc_status || runner == NULL)
     {
         return SYNTAX_ERROR;
-
     }
+
 	while (1 < StackSize(calc->num_stack))
 	{
 		SmallScaleCalc(calc);
