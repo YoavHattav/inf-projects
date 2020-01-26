@@ -11,11 +11,11 @@
 #define __HEAPIFY_H__
 
 #include <stddef.h> /* size_t */
+#include "../include/priorityq.h"
 
-typedef int (*cmp_func_t)(const void *data1, const void *data2, void *param);
 
-void HeapifyUp(void *arr, size_t size, size_t index, size_t element_size, cmp_func_t cmp, void *param);
+void HeapifyUp(void *arr, size_t size, size_t index, size_t element_size, compare_func_ptr cmp, void *param);
 
-void HeapifyDown(void *arr, size_t size, size_t index, size_t element_size, cmp_func_t cmp, void *param);
+void HeapifyDown(void *arr, size_t size, size_t index, size_t element_size, compare_func_ptr cmp, void *param);
 
 #endif

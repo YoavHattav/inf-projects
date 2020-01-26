@@ -1,7 +1,5 @@
 /*********************************/
 /*    Data Structures            */
-/*               */       
-/*    Author : Eliya Goldfisher  */
 /*    Reviewed By:               */
 /*    Date: 8/12/2019            */
 /*                               */
@@ -10,7 +8,6 @@
 #include <stdio.h> /* printf */
 
 #include "priorityq.h"
-#include "sortedlist.h"
 
 #define UNUSED(x) (void)(x)
 #define GREEN "\033[;032m"
