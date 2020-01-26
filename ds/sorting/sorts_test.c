@@ -159,6 +159,19 @@ int TestRadixSort()
 	return 0;
 }
 
+static void TestMergeSort()
+{
+	int arr[] = {12, 11, 13, 5, 6};
+	int temp_arr[5];
+	int i = 0, arr_size = 5;
+	
+	MergeSort(arr, temp_arr, arr_size);
+
+	for (; i < arr_size; ++i)
+	{
+		printf("%d\n", arr[i]);
+	}
+}
 
 int main()
 {
@@ -166,7 +179,8 @@ int main()
 	TestInsertionSort();
 	TestSelectionSort();
 	TestCountingSort();*/
-	TestRadixSort();
+	/*TestRadixSort();*/
+	TestMergeSort();
 
 	return 0; 
 }

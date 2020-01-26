@@ -193,3 +193,63 @@ int RadixSort(unsigned int *arr, size_t size, unsigned int num_of_bits)
 
 	return 0;
 }
+
+void Merge(int *arr, int *temp_arr, size_t size)
+{
+	size_t left_index = 0;
+	size_t right_index = size / 2;
+	size_t temp_index = 0;
+ 	size_t mid_index = right_index;
+
+ 	while ((right_index < size) && (left_index < mid_index))
+ 	{
+ 		if (arr[left_index] >= arr[right_index])
+ 		{
+ 			temp_arr[temp_index] = arr[right_index];
+ 			++right_index;
+ 			++temp_index;
+ 		}
+
+ 		else
+ 		{
+ 			temp_arr[temp_index] = arr[left_index];
+ 			++left_index;
+ 			++temp_index;
+ 		}
+ 	}
+
+ 	while (right_index < size)
+ 	{
+		temp_arr[temp_index] = arr[right_index];
+		++right_index;
+		++temp_index;
+ 	}
+
+ 	while (left_index < mid_index)
+ 	{
+		temp_arr[temp_index] = arr[left_index];
+ 		++left_index;
+ 		++temp_index;
+ 	}
+
+ 	for (temp_index = 0; temp_index < size; ++temp_index)
+ 	{
+ 		arr[temp_index] = temp_arr[temp_index];
+ 	}
+}
+
+void MergeSort(int *src_arr, int *temp_arr, size_t size)
+{
+	size_t mid_point = size / 2;
+
+	if (size < 2)
+	{
+		return;
+	}
+
+	MergeSort(src_arr, temp_arr, mid_point);
+	MergeSort(src_arr + mid_point , temp_arr, size - mid_point);
+
+	Merge(src_arr, temp_arr, size);
+}
+
