@@ -30,7 +30,7 @@ int UserCmp(const void *data1, const void *data2, void *param)
 {
 	UNUSED(param);
 
-	return ((int *)data1 - (int *)data2);
+	return (*(int *)data1 - *(int *)data2);
 }
 
 int MatchFunc(void *data, void *additional)
@@ -46,7 +46,19 @@ static void Test()
     int x2 = 2;
     int x3 = 3;
     int x4 = 4;
+    int x8 = 8;
+    int x5 = 5;
+    int x15 = 15;
+
+    printf("PQ Test heapi up:\n");  
+    pq = PQCreate(&UserCmp, NULL);
+    RUN_TEST(0 == PQEnqueue(pq, &x8), "enqueue");
+    RUN_TEST(0 == PQEnqueue(pq, &x5), "enqueue");
+    RUN_TEST(0 == PQEnqueue(pq, &x15), "enqueue");
+    RUN_TEST(15 == *(int *)PQPeek(pq), "peek");
     
+    PQDestroy(pq);
+
     printf("PQ Test 1:\n");  
     pq = PQCreate(&UserCmp, NULL);
     RUN_TEST(0 == PQEnqueue(pq, &x1), "enqueue");
@@ -74,9 +86,8 @@ static void Test()
     RUN_TEST(0 == PQEnqueue(pq, &x1), "enqueue");
     RUN_TEST(0 == PQEnqueue(pq, &x3), "enqueue");
     RUN_TEST(0 == PQEnqueue(pq, &x2), "enqueue");
-    RUN_TEST(0 == PQEnqueue(pq, &x2), "enqueue");
     RUN_TEST(2 == *(int*)PQErase(pq, &MatchFunc, &x2), "erase");
-    RUN_TEST(3 == PQSize(pq), "size");
+    RUN_TEST(2 == PQSize(pq), "size");
     RUN_TEST(NULL == PQErase(pq, &MatchFunc, &x4), "erase");
  
     PQDestroy(pq); 

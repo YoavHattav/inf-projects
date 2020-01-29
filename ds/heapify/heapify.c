@@ -39,12 +39,14 @@ static void SwapPlace(void **child, void **father)
 
 void HeapifyUp(void *arr, size_t size, size_t index, size_t element_size, compare_func_ptr cmp, void *param)
 {
-	size_t next_parent = size;
-	void **child = VectorGetItemAddress(arr, size);
-	void **parent = VectorGetItemAddress(arr, size / 2);
-	if (1 != size)
+	size_t next_parent = index / 2;
+	void **child = VectorGetItemAddress(arr, index);
+
+	if ((1 < size) && (0 < next_parent))
 	{
-		while ((0 < cmp(*child, *parent, param)) && (0 != next_parent))
+		void **parent = VectorGetItemAddress(arr, next_parent);
+
+		while ((0 != next_parent) && (0 < cmp(*child, *parent, param)))
 		{
 			SwapPlace(child, parent);
 
@@ -69,30 +71,37 @@ void HeapifyDown(void *arr, size_t size, size_t index, size_t element_size, comp
 	leaf_right_addres = VectorGetItemAddress(arr, child_right_index);
 	parent_addres = VectorGetItemAddress(arr, parent_index);
 
-	while (child_right_index <= size)
+	if (child_right_index <= size)
 	{
-		res = cmp(*leaf_left_addres, *leaf_right_addres, param);
-
-		if ((0 < res) && (0 < cmp(*leaf_left_addres, *parent_addres, param)))
+		while (child_right_index <= size)
 		{
-			SwapPlace(parent_addres, leaf_left_addres);
-			parent_index = child_left_index;
-		}
-		else if ((0 >= res) && (0 < cmp(*leaf_right_addres, *parent_addres, param)))
-		{
-			SwapPlace(parent_addres, leaf_right_addres);
-			parent_index = child_right_index;
-		}
+			res = cmp(*leaf_left_addres, *leaf_right_addres, param);
 
-		child_left_index = parent_index * 2;
-		child_right_index = parent_index * 2 + 1;
+			if ((0 < res) && (0 < cmp(*leaf_left_addres, *parent_addres, param)))
+			{
+				SwapPlace(parent_addres, leaf_left_addres);
+				parent_index = child_left_index;
+			}
+			else if ((0 >= res) && (0 < cmp(*leaf_right_addres, *parent_addres, param)))
+			{
+				SwapPlace(parent_addres, leaf_right_addres);
+				parent_index = child_right_index;
+			}
+			else
+			{
+				break;
+			}
 
-		leaf_left_addres = VectorGetItemAddress(arr, child_left_index);
-		leaf_right_addres = VectorGetItemAddress(arr, child_right_index);
-		parent_addres = VectorGetItemAddress(arr, parent_index);
+			child_left_index = parent_index * 2;
+			child_right_index = parent_index * 2 + 1;
+
+			leaf_left_addres = VectorGetItemAddress(arr, child_left_index);
+			leaf_right_addres = VectorGetItemAddress(arr, child_right_index);
+			parent_addres = VectorGetItemAddress(arr, parent_index);
+		}
 	}
 
-	if ((child_left_index == size) && (0 < cmp(*leaf_left_addres, *parent_addres, param)))
+	else if ((child_left_index == size) && (0 < cmp(*leaf_left_addres, *parent_addres, param)))
 	{
 		SwapPlace(parent_addres, leaf_left_addres);
 	}
@@ -135,7 +144,7 @@ void *PQDequeue(pq_t *pq)
 {
 	void **child = NULL;
 	void **parent = NULL;
-	void **dequeued_data = NULL;
+	void *dequeued_data = NULL;
 	size_t size = 0;
 
 	assert(NULL != pq);
@@ -144,13 +153,13 @@ void *PQDequeue(pq_t *pq)
 	parent = VectorGetItemAddress(pq->queue, FIRST_POSITION);
 	SwapPlace(child, parent);
 
-	dequeued_data = child;
+	dequeued_data = *child;
 
 	VectorPopBack(pq->queue);
 	size = VectorSize(pq->queue);
 	HeapifyDown(pq->queue, size, size -1, ELEMENT_SIZE, pq->cmp, pq->param);
 
-	return *dequeued_data;
+	return dequeued_data;
 }
 
 int PQEnqueue(pq_t *pq, void *data)
@@ -166,7 +175,7 @@ int PQEnqueue(pq_t *pq, void *data)
 	}
 	size = VectorSize(pq->queue);
 
-	HeapifyUp(pq->queue, size, size -1, ELEMENT_SIZE, pq->cmp, pq->param);
+	HeapifyUp(pq->queue, size, size, ELEMENT_SIZE, pq->cmp, pq->param);
 
 	return SUCC;
 }
@@ -199,47 +208,56 @@ int PQIsEmpty(const pq_t *pq)
 
 void PQClear(pq_t *pq)
 {
-
 	assert(NULL != pq);
 
 	while (VectorSize(pq->queue))
 	{
 		VectorPopBack(pq->queue);
 	}
-	
 }
 
 void *PQErase(pq_t *pq, match_func m_ptr, void *data)
 {
-	void **tmp_holder = NULL;
+	void *tmp_holder = NULL;
+	void **last_element = NULL;
 	void **swapped_holder = NULL;
 	size_t size = 0;
-	size_t runner = 1;
+	int i = 0;
+	int res = 0;
 
 	assert(NULL != pq);
 	assert(NULL != data);
 
 	size = VectorSize(pq->queue);
 
-	swapped_holder = VectorGetItemAddress(pq->queue, size);
-
-	while (0 < size)
+	if (0 < size)
 	{
-		tmp_holder = VectorGetItemAddress(pq->queue, runner);
-		if (1 == m_ptr(*tmp_holder, data))
+		last_element = VectorGetItemAddress(pq->queue, size);
+
+		for (i = 1; i <= size; ++i)
 		{
-			SwapPlace(tmp_holder, swapped_holder);
+			swapped_holder = VectorGetItemAddress(pq->queue, i);
+			res = m_ptr(*swapped_holder, data);
 
-			HeapifyUp(pq->queue, runner, runner + 1, ELEMENT_SIZE, pq->cmp, pq->param);
-			VectorPopBack(pq->queue);
+			if (1 == res)
+			{
+				tmp_holder = *swapped_holder;
+				SwapPlace(last_element, swapped_holder);
 
-			return *swapped_holder;
+				if (*last_element != *swapped_holder)
+				{
+					HeapifyUp(pq->queue, size, i, ELEMENT_SIZE, pq->cmp, pq->param);
+					HeapifyDown(pq->queue, size, i, ELEMENT_SIZE, pq->cmp, pq->param);	
+				}
+
+				VectorPopBack(pq->queue);
+
+				return tmp_holder;
+			}
 		}
-		--size;
-		++runner;
+
 	}
-
-	return NULL;	
+	
+	return NULL;
 }
-
 

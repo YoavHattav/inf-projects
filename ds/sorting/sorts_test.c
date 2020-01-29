@@ -14,6 +14,7 @@
 #include "sorts.h"
 
 #define SIZE_OF_ARR 100000
+#define UNUSED(x) (void)(x)
 
 void ArrayFiller(int *arr)
 {
@@ -161,15 +162,75 @@ int TestRadixSort()
 
 static void TestMergeSort()
 {
-	int arr[] = {12, 11, 13, 5, 6};
-	int temp_arr[5];
-	int i = 0, arr_size = 5;
+	int arr[] = {10, 80, 30, 90, 40, 50, 70};
+	int temp_arr[7];
+	int i = 0, arr_size = 7;
 	
 	MergeSort(arr, temp_arr, arr_size);
 
 	for (; i < arr_size; ++i)
 	{
 		printf("%d\n", arr[i]);
+	}
+}
+static int UserCompare_QuickSort(const void *data1, const void *data2)
+{
+	return (*(int *)data1 - *(int *)data2);
+}
+
+static void TestQuickSort()
+{
+	int arr[] = {80, 10};
+	int i = 0;
+	size_t elem_size = 4;
+	size_t arr_size = 2;
+	
+	QuickSort(arr, arr_size, elem_size, &UserCompare_QuickSort);
+
+	for (; i < arr_size; ++i)
+	{
+		printf("%d\n", arr[i]);
+	}
+}
+
+static int UserCompare_BinnarySearch(const void *data1, const void *data2, const void *param)
+{
+	UNUSED(param);
+
+	return (*(int *)data1 - *(int *)data2);
+}
+
+static void TestBinarySearch()
+{
+	int arr[] = {10, 20, 30, 40, 50, 60, 70, 80, 90};
+	int i = 0, x = 90;
+	size_t elem_size = 4;
+	size_t arr_size = 9;
+	
+	void *result = NULL;
+
+	result = BinarySearch(arr, elem_size, arr_size, &UserCompare_BinnarySearch, &x, NULL);
+
+	if (NULL != result)
+	{
+		printf("%d\n", *(int *)result);
+	}
+}
+
+static void TestJumpSearch()
+{
+	int arr[] = {10, 20, 30, 40, 50, 60, 70, 80, 90};
+	int i = 0, x = 90;
+	size_t elem_size = 4;
+	size_t arr_size = 9;
+	
+	void *result = NULL;
+
+	result = JumpSearch(arr, elem_size, arr_size, &UserCompare_BinnarySearch, &x, NULL);
+
+	if (NULL != result)
+	{
+		printf("%d\n", *(int *)result);
 	}
 }
 
@@ -179,8 +240,11 @@ int main()
 	TestInsertionSort();
 	TestSelectionSort();
 	TestCountingSort();*/
-	/*TestRadixSort();*/
-	TestMergeSort();
+	/*TestRadixSort();
+	TestMergeSort();*/
+	/*TestQuickSort();*/
+	/*TestBinarySearch();*/
+	TestJumpSearch();
 
 	return 0; 
 }

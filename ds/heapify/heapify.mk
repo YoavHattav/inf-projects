@@ -6,9 +6,9 @@ RELEASE= '-DNDEBUG -O3'
 CC=gcc
 TARGET=heapify
 VECTOR=vector
-INCLUDE_DIR = ../include/
-SHARED_OBJ_DIR = ../lib/
-INNER_OBJ_DIR= ./obj/
+INCLUDE_DIR = /home/codezila/git/ds/include/
+SHARED_OBJ_DIR = /home/codezila/git/ds/lib/
+INNER_OBJ_DIR= /home/codezila/git/ds/heapify/obj/
 
 #.out creation - debug vers
 
@@ -16,7 +16,7 @@ $(TARGET).out: $(SHARED_OBJ_DIR)lib$(TARGET).so $(INNER_OBJ_DIR)$(TARGET)_test.o
 	$(CC) $(CFLAGS) -o $@ $(INNER_OBJ_DIR)$(TARGET)_test.o -L$(SHARED_OBJ_DIR) -l$(TARGET) -Wl,-rpath=$(SHARED_OBJ_DIR)
 
 #Shared lib creation
-$(SHARED_OBJ_DIR)lib$(TARGET).so: $(INNER_OBJ_DIR)$(TARGET).o
+$(SHARED_OBJ_DIR)lib$(TARGET).so: $(INNER_OBJ_DIR)$(TARGET).o $(SHARED_OBJ_DIR)lib$(VECTOR).so
 	$(CC) $(CFLAGS) -L$(SHARED_OBJ_DIR) -shared $< -l$(VECTOR) -Wl,-rpath=$(SHARED_OBJ_DIR) -o $@
 
 #Shared lib obj files creation

@@ -10,6 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
+#include <alloca.h>
+#include <math.h>
 
 #include "sorts.h"
 
@@ -253,3 +256,113 @@ void MergeSort(int *src_arr, int *temp_arr, size_t size)
 	Merge(src_arr, temp_arr, size);
 }
 
+int GenericCompare(void *data1, void *data2, compare_func_ptr user_cmp)
+{
+	return (user_cmp(data1, data2));
+}
+
+static void SwapPlace(void *elem_one, void *elem_two, size_t elem_size)
+{
+	void *tmp_holder = alloca(elem_size);
+
+	memcpy(tmp_holder, elem_one, elem_size);
+	memcpy(elem_one, elem_two, elem_size);
+	memcpy(elem_two, tmp_holder, elem_size);
+}
+
+static size_t Partition
+(void *arr, size_t num_of_memb, size_t elem_size, compare_func_ptr user_cmp)
+{
+	void *pivot = (char *)arr + (elem_size * (num_of_memb - 1));
+	void *base = (char *)arr;
+	void *swapper = NULL;
+	int i = 0, j = 0;
+	
+	while (j < (num_of_memb - 1))
+	{
+		base = (char *)arr + (elem_size * j);
+
+		if (0 >= user_cmp(base, pivot))
+		{
+			swapper = (char *)arr + (elem_size * i);
+			SwapPlace(base ,swapper, elem_size);
+			++i;
+		}
+		++j;
+	}
+	swapper = (char *)arr + (elem_size * i);
+
+	SwapPlace(swapper, pivot, elem_size);
+
+	return i;
+}
+
+void QuickSort(void *base, size_t num_of_memb, size_t elem_size, compare_func_ptr user_cmp)
+{
+	size_t pivot = 0;
+
+	if (1 < num_of_memb)
+	{
+		pivot = Partition(base, num_of_memb, elem_size, user_cmp);
+
+		QuickSort(base, pivot, elem_size, user_cmp);
+		QuickSort(((char *)base + ((pivot + 1) * elem_size)), (num_of_memb - pivot -1), elem_size, user_cmp);
+	}
+}
+
+void *BinarySearch(void *arr, size_t elem_size, size_t num_of_elem,
+ int (*cmp)(const void *data1, const void *data2, const void *param), const void *data, const void *param) 
+{
+	void *runner = arr;
+	size_t middle = num_of_elem / 2;
+
+	runner = (char *)runner + (middle * elem_size);
+
+	if (0 == cmp(data, runner, param))
+	{
+		return runner;
+	}
+
+	else if (0 < cmp(data, runner, param))
+	{
+		return BinarySearch(runner, elem_size, (num_of_elem - middle), cmp, data, param);
+	}
+
+	else
+	{
+		return BinarySearch(arr, elem_size, middle, cmp, data, param);
+	}
+
+	return NULL;
+}
+
+void *JumpSearch(void *arr, size_t elem_size, size_t num_of_elem,
+ int (*cmp)(const void *data1, const void *data2, const void *param), const void *data, const void *param) 
+ {
+ 	void *runner = arr;
+	size_t jump_factor = sqrt(num_of_elem);
+	size_t jump = jump_factor;
+
+	runner = (char *)runner + (jump * elem_size);
+
+	while (num_of_elem >(jump_factor + jump) && (0 < cmp(data, runner, param)))
+	{
+		runner = (char *)runner + (jump * elem_size);
+		jump += jump_factor;
+	}
+	if (0 == cmp(data, runner, param))
+	{
+		return runner;
+	}
+	if (0 > cmp(data, runner, param))
+	{
+		return BinarySearch(((char *)runner - jump_factor) , elem_size, jump_factor, cmp, data, param);
+	}
+
+	if (num_of_elem <= (jump_factor + jump))
+	{
+		return BinarySearch(runner , elem_size, (num_of_elem - jump), cmp, data, param);
+	}
+
+	return NULL;
+ }
