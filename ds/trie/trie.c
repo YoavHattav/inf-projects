@@ -1,8 +1,8 @@
 /*********************************/
 /*   TRIE                        */
 /*   Yoav Hattav                 */
-/*   Last Updated 09/01/20       */
-/*   Reviewed by: Israel         */
+/*   Last Updated 30/01/20       */
+/*   Reviewed by:          */
 /*********************************/
 
 #include <stdio.h>  /* sizeof */
@@ -81,8 +81,8 @@ void TrieDestroy(trie_t *trie)
 	RecDestroy(trie->root);
 	free(trie); trie = NULL;
 }
-        
-status_t TrieInsert(trie_t *trie, char *str)
+
+availability_t TrieIsAvailable(trie_t *trie, char *str)
 {
 	trie_node_t *current = NULL;
 
@@ -94,17 +94,63 @@ status_t TrieInsert(trie_t *trie, char *str)
 	{
 		if (NULL == current->direction[(int)*str])
 		{
-			current->direction[(int)*str] = NodeGenerator();
-			if (NULL == current->direction[(int)*str])
-			{
-				return FAIL;
-			}
+			return AVAILABLE;
 		}
+		if (TAKEN == current->state)
+		{
+			return TAKEN;
+		}
+
 		current = current->direction[(int)*str];
 		++str;
 	}
-	current->state = TAKEN;
-	return SUCCESS;
+
+	return AVAILABLE;
+}
+
+static void UpdateAvilability(trie_node_t *root)
+{
+	if ((NULL != root->direction[LEFT]) && (NULL != root->direction[RIGHT]))
+	{
+		if ((TAKEN == root->direction[LEFT]->state) && (TAKEN == root->direction[RIGHT]->state))
+		{
+			root->state = TAKEN;
+		}
+	}
+}
+
+static status_t InsertHelper(trie_node_t *root, char *str)
+{
+	status_t status;
+
+	if ('\0' == *str)
+	{
+		root->state = TAKEN;
+		return SUCC;
+	}
+
+	if (NULL == root->direction[(int)*str])
+	{
+		root->direction[(int)*str] = NodeGenerator();
+		if (NULL == root->direction[(int)*str])
+		{
+			return FAIL;
+		}
+	}
+
+	status = InsertHelper(root->direction[(int)*str], str + 1);
+
+	UpdateAvilability(root);
+
+	return status;
+}
+
+status_t TrieInsert(trie_t *trie, char *str)
+{
+	assert(NULL != trie);
+	assert(NULL != str);
+
+	return (InsertHelper(trie->root, str));
 }
 
                   

@@ -3,9 +3,6 @@
 
 #include <stddef.h> /*size_t*/
 #include "ip.h"     /*ip_t*/
-#define ADDRESS_SIZE_IN_BYTES 4
-
-typedef unsigned char[ADDRESS_SIZE_IN_BYTES] ip_t;
 
 typedef struct DHCP dhcp_t;
 
@@ -29,7 +26,7 @@ typedef enum
 * ex: 255.255.255.0/24: the first 24 bits are dhcp reserved. 
 * complexity of malloc();       
 */
-dhcp_t *DhcpCreate(ipt_t subnet_mask, size_t subnet_mask_reserved_bits);
+dhcp_t *DhcpCreate(ip_t subnet_mask, size_t subnet_mask_reserved_bits);
 
 /*
 * DhcpDetroy() -
@@ -37,7 +34,7 @@ dhcp_t *DhcpCreate(ipt_t subnet_mask, size_t subnet_mask_reserved_bits);
 * undefined behaviour for @dhcp NULL pointer
 * complexity: free();                  
 */
-void DhcpDetroy(dhct_t *dhcp);
+void DhcpDetroy(dhcp_t *dhcp);
 
 /*
 * DhcpAllocIp() -
@@ -52,7 +49,7 @@ void DhcpDetroy(dhct_t *dhcp);
 * 0.0.0.0, 255.255.255.255, 255.255.255.254: dhcp reserved - if requested undefined behaviour
 * complexity: Olog(n)  
 */
-alc_status_t DhcpAllocIp(dhcp_t *dhcp, ipt_t requested_ip, ip_t allocated_ip);
+alc_status_t DhcpAllocIp(dhcp_t *dhcp, ip_t requested_ip, ip_t allocated_ip);
 
 /*
 * DhcpFreeIp() -

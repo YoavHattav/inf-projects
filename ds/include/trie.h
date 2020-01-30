@@ -5,7 +5,7 @@
 
 typedef enum Status
 {
-    SUCCESS,
+    SUCC,
     FAIL
 } status_t;
 

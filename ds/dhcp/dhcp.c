@@ -1,8 +1,8 @@
 /*********************************/
-/*   BST                         */
+/*   DHCP                        */
 /*   Yoav Hattav                 */
-/*   Last Updated 09/01/20       */
-/*   Reviewed by: Israel         */
+/*   Last Updated 30/01/20       */
+/*   Reviewed by:          */
 /*********************************/
 
 #include <stdio.h>  /* sizeof */
@@ -11,18 +11,27 @@
 
 #include "../include/trie.h" /* API */
 #include "../include/dhcp.h"
-     
-dhcp_t *DhcpCreate(ipt_t subnet_mask, size_t subnet_mask_reserved_bits)
-{
 
+struct DHCP
+{
+	trie_t *trie;
+	ip_t subnet_mask;
+	size_t available_bits;
+};
+
+dhcp_t *DhcpCreate(ip_t subnet_mask, size_t subnet_mask_reserved_bits)
+{
+	dhcp_t *new_dhcp = NULL;
+
+	
 }
                   
-void DhcpDetroy(dhct_t *dhcp)
+void DhcpDetroy(dhcp_t *dhcp)
 {
 
 }
 
-alc_status_t DhcpAllocIp(dhcp_t *dhcp, ipt_t requested_ip, ip_t allocated_ip)
+alc_status_t DhcpAllocIp(dhcp_t *dhcp, ip_t requested_ip, ip_t allocated_ip)
 {
 
 }

@@ -203,7 +203,7 @@ static int UserCompare_BinnarySearch(const void *data1, const void *data2, const
 static void TestBinarySearch()
 {
 	int arr[] = {10, 20, 30, 40, 50, 60, 70, 80, 90};
-	int i = 0, x = 90;
+	int i = 0, x = 80;
 	size_t elem_size = 4;
 	size_t arr_size = 9;
 	
@@ -243,7 +243,7 @@ int main()
 	/*TestRadixSort();
 	TestMergeSort();*/
 	/*TestQuickSort();*/
-	/*TestBinarySearch();*/
+	TestBinarySearch();
 	TestJumpSearch();
 
 	return 0; 
