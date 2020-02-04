@@ -24,7 +24,7 @@ typedef struct Trie trie_t;
 * Returns pointer to the Trie, will return NULL if failed. 
 * complexity of malloc();       
 */
-trie_t *TrieCreate(size_t height);
+trie_t *TrieCreate();
 
 /*
 * TrieDetroy() -
@@ -40,21 +40,40 @@ void TrieDestroy(trie_t *trie);
 * undefined behaviour for @trie NULL pointer
 * complexity: malloc();                  
 */
-status_t TrieInsert(trie_t *trie, const unsigned char *ip);
+status_t TrieInsert(trie_t *trie, char *str);
 
 /*
-* TrieCountLeafs() -
-* Counts the number of occupied leafs in the trie.
+* TrieIsEmpty() -
+* Checks if the trie is empty.
+* undefined behaviour for @trie NULL pointer
+* return value:
+    -TRUE
+    -FALSE
+* complexity: O(1);                  
+*/
+bool_t TrieIsEmpty(const trie_t *trie);
+
+/*
+* TrieSize() -
+* Counts the number of elements in the trie.
 * undefined behaviour for @trie NULL pointer
 * complexity: O(n);                  
 */
-size_t TrieCountOccupiedLeafs(const trie_t *trie);
+size_t TrieSize(const trie_t *trie);
 
-void TrieFreeLeaf(trie_t *trie, unsigned char *ip);
+/*
+* TrieCountLeafs() -
+* Counts the number of leafs in the trie.
+* undefined behaviour for @trie NULL pointer
+* complexity: O(n);                  
+*/
+size_t TrieCountLeafs(const trie_t *trie);
 
-void TrieNextAvailable(trie_t *trie, unsigned char *ip_allocated);
+void TrieFreeLeaf(trie_t *trie, char *str);
 
-availability_t TrieIsAvailable(const trie_t *trie, unsigned char *ip);
+void TrieFirstAvailable(trie_t *trie, char *buffer);
+
+availability_t TrieIsAvailable(trie_t *trie, char *str);
 
 #endif 
 

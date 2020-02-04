@@ -5,10 +5,7 @@
 
 #define ADDRESS_SIZE_IN_BYTES 4
 
-typedef struct IP
-{
-	unsigned char address[ADDRESS_SIZE_IN_BYTES];
-} ip_t;
+typedef unsigned char ip_t[ADDRESS_SIZE_IN_BYTES];
 
 void CharIntoBinary(char *address_to_be, unsigned char chr);
 
@@ -17,6 +14,8 @@ void Ip_tToStr(char *address_to_be, ip_t user_address);
 unsigned char BinaryIntoChar(char *address_to_be);
 
 void StrToIp_t(char *address, ip_t user_address);
+
+void SetbitsInStr(char *address, int state);
 
 #endif
 

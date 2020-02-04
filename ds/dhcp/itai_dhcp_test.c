@@ -37,13 +37,13 @@
 static void Test()
 {
     dhcp_t *dhcp = NULL;
-    unsigned char sub[4] = {0,0,0,0};
+    unsigned char sub[4] = {7,4,3,0};
 
     dhcp = DhcpCreate(sub, 24);
     
-    RUN_TEST(253 == DhcpCountFree(dhcp), "CountLeafs");
-    DhcpFreeIp(dhcp, sub);
-    RUN_TEST(253 == DhcpCountFree(dhcp), "CountLeafs");
+    /*RUN_TEST(253 == DhcpCountFree(dhcp), "CountLeafs");
+    RUN_TEST(INVALID_ADDRESS == DhcpFreeIp(dhcp, sub), "bolbol");
+    RUN_TEST(254 == DhcpCountFree(dhcp), "CountLeafs");*/
 
     DhcpDetroy(dhcp);
 

@@ -16,7 +16,7 @@ typedef enum
 typedef enum 
 {
     SUCCESS, 
-    ADDRESS_NOT_FOUND
+    INVALID_ADDRESS
 } free_status_t;
 
 /*
