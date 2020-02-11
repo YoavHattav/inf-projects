@@ -2,7 +2,10 @@
 #define __DHCP_H__
 
 #include <stddef.h> /*size_t*/
-#include "ip.h"     /*ip_t*/
+
+#define ADDRESS_SIZE_IN_BYTES 4
+
+typedef unsigned char ip_t[ADDRESS_SIZE_IN_BYTES];
 
 typedef struct DHCP dhcp_t;
 
@@ -15,7 +18,8 @@ typedef enum
 
 typedef enum 
 {
-    SUCCESS, 
+    SUCCESS,
+    ADDRESS_NOT_FOUND,
     INVALID_ADDRESS
 } free_status_t;
 
@@ -34,7 +38,7 @@ dhcp_t *DhcpCreate(ip_t subnet_mask, size_t subnet_mask_reserved_bits);
 * undefined behaviour for @dhcp NULL pointer
 * complexity: free();                  
 */
-void DhcpDetroy(dhcp_t *dhcp);
+void DhcpDestroy(dhcp_t *dhcp);
 
 /*
 * DhcpAllocIp() -

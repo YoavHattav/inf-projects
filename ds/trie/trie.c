@@ -2,28 +2,24 @@
 /*   TRIE                        */
 /*   Yoav Hattav                 */
 /*   Last Updated 30/01/20       */
-/*   Reviewed by:          */
+/*   Reviewed by: Guy Cohen-Zedek*/
 /*********************************/
-#include <stdio.h>  /* sizeof */
 #include <stdlib.h> /* malloc */
 #include <assert.h> /* assert */
-#include <string.h>
 
-#include "../include/trie.h" /* API */
+#include "trie.h" /* API */
 
-#define END_DATA 0xDEADBEEF
-#define MASK 00000001
-#define SIZE_OF_IP_IN_BYTES 4
+#define LSB 0x01
 #define BITS_IN_BYTE 8
 #define BITS_IN_IP 32
 
-enum child {LEFT, RIGHT};
+enum child {LEFT, RIGHT, NUM_OF_CHILDREN};
 
 typedef struct TrieNode trie_node_t;
 
 struct TrieNode
 {
-	struct TrieNode *direction[2];
+	struct TrieNode *direction[NUM_OF_CHILDREN];
 	availability_t state;
 };
 
@@ -33,23 +29,24 @@ struct Trie
 	size_t height;
 };
 
+/***************************************************************************
+							STATIC FUNCTIONS
+***************************************************************************/
+
 static int SidePickerIMP(unsigned char *ip, size_t height);
-
 static size_t RecLeafCounterIMP(trie_node_t *root);
-
-static availability_t IsAvailableIMP(trie_node_t *root, size_t height, unsigned char *ip);
-
-static void FreeLeafHelperIMP(trie_node_t *root, size_t height, unsigned char *ip);
-
-static status_t InsertHelperIMP(trie_node_t *root, size_t height, const unsigned char *ip);
-
+static availability_t IsAvailableIMP(trie_node_t *root,
+					 size_t height, unsigned char *ip);
+static void FreeLeafHelperIMP(trie_node_t *root, size_t height,
+											 unsigned char *ip);
+static status_t InsertHelperIMP(trie_node_t *root, size_t height,
+										 const unsigned char *ip);
 static void RecDestroyIMP(trie_node_t *root);
-
 static trie_node_t *NodeGeneratorIMP();
-
 static void UpdateAvilabilityIMP(trie_node_t *root);
-
-static void NextAvailableIMP(trie_node_t *node, size_t height, unsigned char *buffer);
+static void NextAvailableIMP(trie_node_t *node, size_t height,
+										 unsigned char *buffer);
+static void ZeroingAvailBits(unsigned char *ip_allocated, size_t height);
 
 /***************************************************************************
 							API FUNCTIONS
@@ -77,7 +74,7 @@ void TrieDestroy(trie_t *trie)
 {
 	assert(NULL != trie);
 
-	RecDestroyIMP(trie->root);
+	RecDestroyIMP(trie->root);trie->root = NULL;
 	free(trie); trie = NULL;
 }
 
@@ -104,7 +101,8 @@ void TrieFreeLeaf(trie_t *trie, unsigned char *ip)
 void TrieNextAvailable(trie_t *trie, unsigned char *ip_allocated)
 {   
     assert(NULL != trie);
-   
+   	
+   	ZeroingAvailBits(ip_allocated, trie->height);
     NextAvailableIMP(trie->root, trie->height, ip_allocated);
 }
 
@@ -126,49 +124,45 @@ size_t TrieCountOccupiedLeafs(const trie_t *trie)
 }
 
 /***************************************************************************
-							IMP FUNCTIONS
+							STATIC FUNCTIONS
 ***************************************************************************/
 
 static size_t RecLeafCounterIMP(trie_node_t *root)
 {
-	int size = 0;
-
 	if (NULL == root)
 	{
 		return 0;
 	}
 
-	if ((NULL == root->direction[LEFT]) && (NULL == root->direction[RIGHT]) && (root->state == TAKEN))
+	if ((NULL == root->direction[LEFT]) && (NULL == root->direction[RIGHT]) && 
+														(root->state == TAKEN))
 	{
-		++size;
+		return 1;
 	}
 
-	size += RecLeafCounterIMP(root->direction[LEFT]);
-	size += RecLeafCounterIMP(root->direction[RIGHT]);
-
-	return size;
+	return (RecLeafCounterIMP(root->direction[LEFT]) + RecLeafCounterIMP(root->direction[RIGHT]));
 }
 
-static availability_t IsAvailableIMP(trie_node_t *root, size_t height, unsigned char *ip)
+static availability_t IsAvailableIMP(trie_node_t *root, size_t height,
+													 unsigned char *ip)
 {
 	int side = SidePickerIMP(ip, height);
-	if ((0 == height) || (NULL == root->direction[side]))
-	{
-		return AVAILABLE;
-	}
 	if (TAKEN == root->state)
 	{
 		return TAKEN;
+	}
+	if ((0 == height) || (NULL == root->direction[side]))
+	{
+		return AVAILABLE;
 	}
 	
 	return IsAvailableIMP(root->direction[side], (height - 1), ip);
 }
 
-static void FreeLeafHelperIMP(trie_node_t *root, size_t height, unsigned char *ip)
+static void FreeLeafHelperIMP(trie_node_t *root, size_t height,
+											 unsigned char *ip)
 {
-	int side = 0;
-
-	side = SidePickerIMP(ip, height);
+	int side = SidePickerIMP(ip, height);
 	if (NULL == root)
 	{
 		return;
@@ -182,10 +176,11 @@ static void FreeLeafHelperIMP(trie_node_t *root, size_t height, unsigned char *i
 
 	root->state = AVAILABLE;
 
-	FreeLeafHelperIMP(root->direction[side], (height -1), ip);
+	FreeLeafHelperIMP(root->direction[side], (height - 1), ip);
 }
 
-static status_t InsertHelperIMP(trie_node_t *root, size_t height, const unsigned char *ip)
+static status_t InsertHelperIMP(trie_node_t *root, size_t height,
+										 const unsigned char *ip)
 {
 	status_t status = SUCC;
 	unsigned char *runner = (unsigned char *)ip;
@@ -208,7 +203,7 @@ static status_t InsertHelperIMP(trie_node_t *root, size_t height, const unsigned
 		}
 	}
 
-	status = InsertHelperIMP(root->direction[side], (height -1), ip);
+	status = InsertHelperIMP(root->direction[side], (height - 1), ip);
 
 	UpdateAvilabilityIMP(root);
 
@@ -224,12 +219,17 @@ static void RecDestroyIMP(trie_node_t *root)
 	RecDestroyIMP(root->direction[LEFT]);
 	RecDestroyIMP(root->direction[RIGHT]);
 
+	root->direction[LEFT] = NULL;
+	root->direction[RIGHT] = NULL;
 	free(root); root = NULL;
 }
 
 static int SidePickerIMP(unsigned char *ip, size_t height)
 {
-	return (((*(ip + (32 - height) / 8)) & (MASK << (height - 1) % 8)) >> ((height -1) % 8));
+	assert(NULL != ip);
+
+	return (((*(ip + (BITS_IN_IP - height) / BITS_IN_BYTE)) & 
+		(LSB << (height - 1) % BITS_IN_BYTE)) >> ((height - 1) % BITS_IN_BYTE));
 }
 
 static trie_node_t *NodeGeneratorIMP()
@@ -251,15 +251,20 @@ static void UpdateAvilabilityIMP(trie_node_t *root)
 {
 	if ((NULL != root->direction[LEFT]) && (NULL != root->direction[RIGHT]))
 	{
-		if ((TAKEN == root->direction[LEFT]->state) && (TAKEN == root->direction[RIGHT]->state))
+		if ((TAKEN == root->direction[LEFT]->state) && 
+			(TAKEN == root->direction[RIGHT]->state))
 		{
 			root->state = TAKEN;
 		}
 	}
 }
 
-static void NextAvailableIMP(trie_node_t *root, size_t height, unsigned char *buffer)
+static void NextAvailableIMP(trie_node_t *root, size_t height,
+										 unsigned char *buffer)
 {
+	assert(NULL != root);
+	assert(NULL != buffer);
+
     if (NULL == root || 0 == height)
     {
         return;  
@@ -273,7 +278,20 @@ static void NextAvailableIMP(trie_node_t *root, size_t height, unsigned char *bu
     else
     {
         *(buffer + (BITS_IN_IP - height) / BITS_IN_BYTE) |=
-                 (MASK << (height - 1) % BITS_IN_BYTE);
+                 (LSB << (height - 1) % BITS_IN_BYTE);
         NextAvailableIMP(root->direction[RIGHT], (height - 1), buffer);
     }
+}
+
+static void ZeroingAvailBits(unsigned char *ip_allocated, size_t height)
+{
+	size_t available_bits = height;
+
+	assert(NULL != ip_allocated);
+	
+	for (; height > 0; --height)
+	{
+		*(ip_allocated + (BITS_IN_IP - available_bits) / BITS_IN_BYTE) &=
+                 ~(LSB << ((height - 1) % BITS_IN_BYTE));
+	}
 }

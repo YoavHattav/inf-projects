@@ -38,6 +38,7 @@ static void SwapPlace(void **child, void **father)
 }
 
 void HeapifyUp(void *arr, size_t size, size_t index, size_t element_size, compare_func_ptr cmp, void *param)
+
 {
 	size_t next_parent = index / 2;
 	void **child = VectorGetItemAddress(arr, index);
@@ -107,7 +108,6 @@ void HeapifyDown(void *arr, size_t size, size_t index, size_t element_size, comp
 	}
 }
 	
-
 pq_t *PQCreate(compare_func_ptr user_cmp, void *param)
 {	
 	pq_t *new_pq = NULL;
