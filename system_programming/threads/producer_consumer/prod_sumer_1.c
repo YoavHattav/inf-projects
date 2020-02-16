@@ -9,7 +9,6 @@
 #define GREEN "\033[;032m"
 #define RED   "\033[;031m"
 #define RESET "\033[0m"
-#define UNUSED(x) (void)(x)
 #define RUN_TEST(test)\
 {\
   if(test)\
@@ -26,8 +25,14 @@
   }\
 }
 
-int lock_flag = 0;
+enum state{
+	WRITE,
+	READ
+};
+
 int arr[NUM_OF_ELEMENTS] = {0};
+
+int flag = WRITE;
 
 void *ProducerFunction(void *data)
 {
@@ -37,14 +42,14 @@ void *ProducerFunction(void *data)
 	{
 		size_t j = 0;
 
-		while (!__sync_lock_test_and_set(&lock_flag, 1));
+		while (__sync_lock_test_and_set(&flag, READ));
 
 		for (j = 0; j < NUM_OF_ELEMENTS; ++j)
 		{
 			arr[j] = i;
 		}
 
-		__sync_lock_release(&lock_flag);
+		__sync_lock_test_and_set(&flag, WRITE);
 	}
 
 	return data;
@@ -58,15 +63,15 @@ void *ConsumerFunction(void *data)
 	{
 		size_t j = 0;
 
-		while (__sync_lock_test_and_set(&lock_flag, 0));
+		while (__sync_lock_test_and_set(&flag, READ));
 
 		for (j = 0; j < NUM_OF_ELEMENTS; ++j)
 		{
-			printf("%d\n", arr[j]);
-			RUN_TEST(arr[j] == arr[NUM_OF_ELEMENTS - 1]);
+			printf("%d", arr[j]);
 		}
+		printf("\n");
 
-		__sync_lock_release(&lock_flag);
+		__sync_lock_test_and_set(&flag, WRITE);
 	}
 
 	return data;	
@@ -77,17 +82,17 @@ int main(int argc, char const *argv[])
 	pthread_t producer = {0};
 	pthread_t consumer = {0};
 
-	if (0 != pthread_create(&producer, NULL, ProducerFunction, NULL))
-	{
-		printf("failed to create thread\n");
-		
-		return 1;
-	}
 
 	if (0 != pthread_create(&consumer, NULL, ConsumerFunction, NULL))
 	{
 		printf("failed to create thread\n");
 
+		return 1;
+	}
+	if (0 != pthread_create(&producer, NULL, ProducerFunction, NULL))
+	{
+		printf("failed to create thread\n");
+		
 		return 1;
 	}
 
