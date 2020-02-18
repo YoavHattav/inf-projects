@@ -1,3 +1,10 @@
+/*********************************/
+/*	  PRO_CONS_MUTEX             */
+/*    Author :Yoav Hattav        */
+/*                               */
+/*    Date:     17/02/2020       */
+/*********************************/
+
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
@@ -41,21 +48,18 @@ int data_index = 0;
 
 void *ProducerFunction(void *list)
 {
-	while (1 && (NUM_OF_ELEMENTS > data_index))
+	pthread_mutex_lock(&mutex_lock);
+
+	if (!DLLPushFront((dll_t *)list, &arr[data_index]))
 	{
-		pthread_mutex_lock(&mutex_lock);
+		printf("insert failed\n");
 
-		if (!DLLPushFront((dll_t *)list, &arr[data_index]))
-		{
-			printf("insert failed\n");
-
-			return NULL;
-		}
-		++data_index;
-
-		pthread_mutex_unlock(&mutex_lock);
+		return NULL;
 	}
-	
+	++data_index;
+
+	pthread_mutex_unlock(&mutex_lock);
+		
 	return NULL;
 }
 
@@ -63,19 +67,19 @@ void *ConsumerFunction(void *list)
 {
 	void *removed_value = NULL;
 
-	while(1)
+	pthread_mutex_lock(&mutex_lock);
+
+	while (DLLIsEmpty((dll_t *)list))
 	{
-		pthread_mutex_lock(&mutex_lock);
-
-		if (!DLLIsEmpty((dll_t *)list))
-		{
-			removed_value = DLLPopBack((dll_t *)list);
-			printf("%d\n", *(int *)removed_value);
-		}
-
 		pthread_mutex_unlock(&mutex_lock);
+		pthread_mutex_lock(&mutex_lock);
 	}
 
+	removed_value = DLLPopBack((dll_t *)list);
+	printf("%d\n", *(int *)removed_value);
+
+	pthread_mutex_unlock(&mutex_lock);
+	
 	return NULL;	
 }
 

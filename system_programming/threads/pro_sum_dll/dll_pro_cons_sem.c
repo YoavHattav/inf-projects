@@ -1,3 +1,9 @@
+/*********************************/
+/*	  PRO_CONS_SEMAPHOR          */
+/*    Author :Yoav Hattav        */
+/*                               */
+/*    Date:     17/02/2020       */
+/*********************************/
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>

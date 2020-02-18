@@ -1,3 +1,9 @@
+/*********************************/
+/*	  PRO_CONS_1                 */
+/*    Author :Yoav Hattav        */
+/*                               */
+/*    Date:     17/02/2020       */
+/*********************************/
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>

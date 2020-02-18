@@ -5,6 +5,7 @@
 /*    Reviewed By: Shye Shapira  */
 /*    Date:     26/11/2019       */
 /*********************************/
+
 #include <assert.h> /* assert */ 
 #include <stdlib.h> /* malloc */ 
 #include <string.h> /* memcpy */
@@ -28,7 +29,7 @@ struct CBuffer
 
 cbuffer_t *CBufferCreate(size_t capacity)
 {
-	cbuffer_t *new_cb = (cbuffer_t *)malloc(OFFSET(cbuffer_t, arr)+capacity);
+	cbuffer_t *new_cb = (cbuffer_t *)malloc(OFFSET(cbuffer_t, arr) + capacity);
 	if (NULL == new_cb)
 	{
 		return NULL;
