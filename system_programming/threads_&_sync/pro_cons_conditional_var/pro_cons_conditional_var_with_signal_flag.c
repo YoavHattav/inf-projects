@@ -1,5 +1,5 @@
 /*********************************/
-/*	  PRO_CONS_circular 2        */
+/*	  PRO_CONS_cv_signalflag     */
 /*    Author :Yoav Hattav        */
 /*                               */
 /*    Date:     17/02/2020       */
@@ -32,19 +32,19 @@ void *ProducerFunction(void *circ_buff)
 {
 	while (1)
 	{
+		for (int i = 0; i < NUM_OF_CONS_THREADS; ++i)
+		{
+			sem_wait(&produced_counter_sem);
+		}
 		pthread_mutex_lock(&mutex_lock);
+
 		printf("work\n");
 		++product;
 
-		for (int i = 0; i < NUM_OF_CONS_THREADS; ++i)
-		{
-			sem_post(&produced_counter_sem);
-		}
-
-		pthread_cond_wait(&producer_blocker_cv, &mutex_lock);
+		pthread_cond_broadcast(&producer_blocker_cv);
 		pthread_mutex_unlock(&mutex_lock);
 	}
-
+	
 	return NULL;
 }
 
@@ -52,17 +52,16 @@ void *ConsumerFunction(void *circ_buff)
 {
 	while (1)
 	{
-		sem_wait(&produced_counter_sem);
+		int flag = product;
 		pthread_mutex_lock(&mutex_lock);
-		
-		printf("%d\n", product);
-		++counter;
+		sem_post(&produced_counter_sem);
 
-		if (NUM_OF_CONS_THREADS == counter)
+		while (flag == product)
 		{
-			counter = 0;
-			pthread_cond_signal(&producer_blocker_cv);
+			pthread_cond_wait(&producer_blocker_cv, &mutex_lock);
 		}
+
+		printf("%d\n", product);
 
 		pthread_mutex_unlock(&mutex_lock);
 	}
