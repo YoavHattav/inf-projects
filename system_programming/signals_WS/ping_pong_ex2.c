@@ -37,8 +37,6 @@ int main (int argc, char *argv[])
 
 	if (0 == child_id)
 	{
-		printf("BEN HAMElEH1\n");
-
 		execvp(argv[1], &argv[2]);
 	}
 
