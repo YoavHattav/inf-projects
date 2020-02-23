@@ -1,14 +1,9 @@
-#make file - sortedlist
-
 CFLAGS=-ansi -pedantic-errors -Wall -Wextra
 DEBUG=	-g
 RELEASE= -DNDBUG -03
 CC=gcc
 TARGET=scheduler
 PRIORITYQ=priorityq
-DLL=dll
-UID=uid
-SORTED=sortedlist
 DS_INCLUDE_DIR = /home/codezila/git/ds/include/
 SP_INCLUDE_DIR = /home/codezila/git/system_programming/include/
 SP_LIB_DIR = /home/codezila/git/system_programming/lib/

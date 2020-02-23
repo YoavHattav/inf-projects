@@ -12,150 +12,51 @@
 #include <assert.h>	/* assert */
 #include <signal.h>
 #include <stdlib.h>
+#include <pthread.h> /* threads */
 
 #include "../include/scheduler.h"
 #include "wd.h"
+#include "wd_util_funcs.h"
 
-#define UNUSED(x) (void)(x)
-
-typedef struct pack
+wd_t *WDStart(const char *filename, enum status *status_holder)
 {
-	scheduler_t *scheduler;
-	pthread_t *thread;
+	pid_t fork_return_value = 0;
 
-}wd_t;
-
-int updated_id = 0;
-int im_alive = 0;
-
-static void SigUsr1Handler(int sig)
-{
-	++im_alive;
-}	
-
-static int AppTaskImAlive(void *param)
-{
-	UNUSED(param);
-
-	printf("Woof\n");
-	kill(updated_id, SIGUSR1);
-
-	return 0;
-}
-
-static scheduler_t *WDInit(enum status status_holder)
-{
-	time_t interval = 2;
-	struct sigaction sigact;
-
-	scheduler_t *scheduler = SchedulerCreate();
-
-	SchedulerAddTask(scheduler, &AppTaskImAlive, interval, NULL);
-
-    sigact.sa_handler = SigUsr1Handler;
-    sigact.sa_flags = 0;
-
-	sigaction(SIGUSR1, &sigact, NULL);
-
-	return scheduler;
-}
-
-static void *WDSchedulerRun(void *pack)
-{
-	SchedulerRun(((wd_t *)pack)->scheduler);
-
-	return NULL;
-}
-
-wd_t *WDStart(const char *filename, enum status status_holder)
-{
-	pthread_t thread;
-
-	wd_t *pack = malloc(sizeof(*pack));
+	wd_t *pack = NULL;
 
 	assert(NULL != filename);
 
-	pack->scheduler = WDInit(status_holder);
-
-	pthread_create(&thread, NULL, &WDSchedulerRun, pack->scheduler);
-
-	updated_id = fork();
-	if (updated_id > 0)
+	if ((fork_return_value = fork()) == 0)
 	{
-		exec(filename);
+		execl("./wd_out", "./wd_out", NULL);
 	}
+	
+	partner_id = fork_return_value;
+	
+	printf("app id :%d\n", getpid());
+	pack = WDInit(status_holder);
+
+	pthread_create(&pack->thread, NULL, &WDSchedulerRun, pack);
 
 	return pack;
 }
 
-#include <signal.h>  
-#include <stdio.h>  
-#include <string.h>  
-#include <sys/types.h>  
-#include <unistd.h>
-#include <sys/wait.h>
-
-volatile sig_atomic_t state =  0;
-
-void SigHandler(int sig)
+void WDStop(wd_t *pack)
 {
-    if (sig == SIGUSR1)
-    {
-        write(1, "PING\n", 5);
-        state = 1;
-    }
-
-    if (sig == SIGUSR2)
-    {
-        write(1, "PONG\n", 5);
-        state = 0;
-    }
-}
-
-void PingPongEX1()
-{	
-    pid_t fork_return_status = 0;
-    struct sigaction sigact;
-
-    sigact.sa_handler = SigHandler;
-    sigact.sa_flags = 0;
-
-	sigaction(SIGUSR1, &sigact, NULL);
-	sigaction(SIGUSR2, &sigact, NULL);
-
-	fork_return_status = fork();
-
-	if(0 < fork_return_status)
+	time_t sleep_timer = 20;
+	while(sleep_timer)
 	{
-		while(1)
-		{
-			while(1 == state)
-			{
-			}
-
-			state = 1;
-			kill(fork_return_status, SIGUSR1);
-		}
+		sleep_timer = sleep(sleep_timer);
 	}
 
-	if(0 == fork_return_status)
-	{
-		while(1)
-		{
-			while(0 == state)
-			{
-			}
+	printf("yoav is the man\n");
 
-			state = 0;
-			kill(getppid(), SIGUSR2);
-		}
-	}	
+	printf("my-%d\n", getpid());
+	printf("wd-%d\n", partner_id);
+
+	kill(partner_id, SIGUSR2);
+	kill(getpid(), SIGUSR2);
+
+	pthread_join((pack->thread), NULL);
 }
 
-int main(int argc, char *argv[])
-{
-
- 	PingPongEX1();
-
-  	return 0;  
-}
