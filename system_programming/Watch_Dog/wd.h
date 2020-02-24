@@ -7,7 +7,8 @@ typedef struct pack wd_t;
 
 enum status{
 	SUCCESS,
-	MEMORY_FAIL
+	MEMORY_FAIL,
+	OS_FAIL
 };
 
 /* the function recives a pointer to a thread created by the user */
