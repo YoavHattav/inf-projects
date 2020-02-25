@@ -5,15 +5,16 @@
 /*   Last Updated 24/02/20       */
 /*   Reviewed by:                */
 /*********************************/
-#include <stdio.h>
-#include <unistd.h>
+#include <unistd.h> /* sleep */
 
 #include "wd.h"
+
+#define UNUSED(x) (void)(x)
 
 int main(int argc, char const *argv[])
 {
 	wd_t *pack= NULL;
-	enum status status_holder;
+	enum status status_holder = SUCCESS;
 	time_t sleep_timer = 30;
 
 	pack = WDStart(argv[0], &status_holder);
@@ -26,6 +27,8 @@ int main(int argc, char const *argv[])
 	/********* DNR *************/
 	
 	WDStop(pack);
+
+	UNUSED(argc);
 
 	return 0;
 }

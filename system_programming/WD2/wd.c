@@ -20,27 +20,12 @@
 #include "wd.h"
 #include "wd_util_funcs.h"
 
-sem_t *sem_wd_is_up_flag;
+sem_t *sem_wd_is_up_flag = NULL; /**/
 
-wd_t *WDStart(const char *filename, enum status *status_holder)
+static void ExecWDIfNotUP(wd_t *pack)
 {
 	pid_t fork_return_value = 0;
 	int wd_sem_up_value = 0;
-
-	wd_t *pack = NULL;
-
-	printf("start func\n");
-	
-	printf("app id :%d\n", getpid());
-	pack = WDInit(status_holder);
-	if (NULL == pack)
-	{
-		printf("failed to init pack in start func\n");
-
-		return NULL;
-	}
-	pack->my_exec = filename;
-	pack->partner_exec = "./wd_out";
 
 	sem_wd_is_up_flag = sem_open("/sem_wd_is_up_flag", O_CREAT, 0644, 0);
 	sem_getvalue(sem_wd_is_up_flag, &wd_sem_up_value);
@@ -60,6 +45,28 @@ wd_t *WDStart(const char *filename, enum status *status_holder)
 	{
 		partner_id = getppid();
 	}
+}
+
+wd_t *WDStart(const char *filename, enum status *status_holder)
+{
+	wd_t *pack = NULL;
+
+	assert(NULL != filename);
+
+	printf("start func\n");
+
+	printf("app id :%d\n", getpid());
+	pack = WDInit(status_holder);
+	if (NULL == pack)
+	{
+		printf("failed to init pack in start func\n");
+
+		return NULL;
+	}
+	pack->my_exec = filename;
+	pack->partner_exec = "./wd_out";
+
+	ExecWDIfNotUP(pack);
 
 	pack->p1 = sem_open("/sem_app_is_ready", O_CREAT, 0644, 0);
 	if (SEM_FAILED == pack->p1)
@@ -72,6 +79,8 @@ wd_t *WDStart(const char *filename, enum status *status_holder)
 	if (SEM_FAILED == pack->p2)
 	{
 		*status_holder = OS_FAIL;
+		sem_close(pack->p1);
+		sem_unlink("/sem_app_is_ready");
 
 		return NULL;
 	}
@@ -93,17 +102,19 @@ void WDStop(wd_t *pack)
 
 	int stop_flag_value = 0;
 
-	while((0 == stop_flag_value) && (end > start))
+	assert(NULL != pack); /**/
+
+	while ((0 == stop_flag_value) && (end > start))
 	{
 		sem_getvalue(sem_stop_flag, &stop_flag_value);
 		kill(partner_id, SIGUSR2);
-		kill(getpid(), SIGUSR2);
+		kill(getpid(), SIGUSR2); 
 		start = time(NULL);
 	}
 	if (0 == stop_flag_value)
 	{
 		kill(partner_id, SIGUSR2);
-		kill(getpid(), SIGUSR2);
+		kill(getpid(), SIGUSR2); 
 	}
 
 	sem_close(sem_wd_is_up_flag);

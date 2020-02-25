@@ -18,29 +18,29 @@
 #include "wd.h"
 #include "wd_util_funcs.h"
 
-#define UNUSED(x) (void)(x)
-
 int im_alive = 0;
 
 /*********** signal handlers **********/
 static void SigUsr1Handler(int sig)
 {
+	UNUSED(sig);
 	++im_alive;
 }
 
 static void SigUsr2Handler(int sig)
 {
+	UNUSED(sig);
 	printf("handler2\n");
 	sem_post(sem_stop_flag);
 }		
 /*********** signal handlers **********/
 
 /************* Tasks ******************/
-static int AppTaskImAlive(void *param)
+static int TaskImAlive(void *param)
 {
 	int sem_stop_flag_value = 0;
-	
-	UNUSED(param);
+
+	assert(NULL != param);
 
 	sem_getvalue(sem_stop_flag, &sem_stop_flag_value);
 
@@ -58,10 +58,12 @@ static int AppTaskImAlive(void *param)
 	return 0;
 }
 
-static int AppTaskIsAlive(void *param)
+static int TaskIsAlive(void *param)
 {
 	printf("Task2\n");
 
+	assert(NULL != param);
+	
 	if (0 == im_alive)
 	{
 		int fork_return_value = 0;
@@ -70,7 +72,7 @@ static int AppTaskIsAlive(void *param)
 
 		printf("Task 2 revive\n");
 		printf("executing %s\n", ((wd_t *)param)->partner_exec);
-		if ((fork_return_value = fork()) == 0)
+		if (0 == (fork_return_value = fork()))
 		{
 			execl(((wd_t *)param)->partner_exec, ((wd_t *)param)->partner_exec, ((wd_t *)param)->my_exec, NULL);
 
@@ -120,24 +122,35 @@ wd_t *WDInit(enum status *status_holder)
 		printf("failed to create the scheduler\n");
 
 		*status_holder = MEMORY_FAIL;
+		sem_close(sem_stop_flag);
+
+		sem_unlink("/sem_stop_flag");
 
 		return NULL;
 	}
 	
-	if (UIDIsBad(SchedulerAddTask(pack->scheduler, &AppTaskImAlive, interval, pack)))
+	if (UIDIsBad(SchedulerAddTask(pack->scheduler, &TaskImAlive, interval, pack)))
 	{
 		printf("bad uid\n");
 		SchedulerDestroy(pack->scheduler);
 		*status_holder = MEMORY_FAIL;
-	
+
+		sem_close(sem_stop_flag);
+
+		sem_unlink("/sem_stop_flag");
+
 		return NULL;
 	}
-	if (UIDIsBad(SchedulerAddTask(pack->scheduler, &AppTaskIsAlive, (3 * interval), pack)))
+	if (UIDIsBad(SchedulerAddTask(pack->scheduler, &TaskIsAlive, (3 * interval), pack)))
 	{	
 		printf("bad uid\n");
 
 		SchedulerDestroy(pack->scheduler);
 		*status_holder = MEMORY_FAIL;
+
+		sem_close(sem_stop_flag);
+
+		sem_unlink("/sem_stop_flag");
 
 		return NULL;
 	}
@@ -148,8 +161,8 @@ wd_t *WDInit(enum status *status_holder)
     sigact2.sa_handler = SigUsr2Handler;
     sigact2.sa_flags = 0;
 
-	sigaction(SIGUSR1, &sigact1, NULL);
-	sigaction(SIGUSR2, &sigact2, NULL);
+	sigaction(SIGUSR1, &sigact1, NULL); /*check fail */
+	sigaction(SIGUSR2, &sigact2, NULL); /*check fail */
 
 	*status_holder = SUCCESS;
 
@@ -158,6 +171,8 @@ wd_t *WDInit(enum status *status_holder)
 
 static void CleanUp(wd_t *pack)
 {
+	assert(NULL != pack);
+
 	printf("Cleanup\n");
 	SchedulerDestroy(pack->scheduler);
 	sem_close(sem_stop_flag);
@@ -170,15 +185,17 @@ static void CleanUp(wd_t *pack)
 void *WDSchedulerRun(void *pack)
 {
 	int sem_stop_flag_value = 0;
-	
+
+	assert(NULL != pack);
+
 	sem_getvalue(sem_stop_flag, &sem_stop_flag_value);
 
 	while (0 == sem_stop_flag_value)
 	{
-		sem_getvalue(sem_stop_flag, &sem_stop_flag_value);
 		sem_post(((wd_t *)pack)->p1);
 		sem_wait(((wd_t *)pack)->p2);
 		SchedulerRun(((wd_t *)pack)->scheduler);
+		sem_getvalue(sem_stop_flag, &sem_stop_flag_value);
 	}
 
 	CleanUp(pack);
