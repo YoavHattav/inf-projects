@@ -26,7 +26,6 @@ sem_t *sem_stop_flag;
 
 static void SigUsr1Handler(int sig)
 {
-	printf("handler1\n");
 	++im_alive;
 }
 
@@ -52,7 +51,7 @@ static int AppTaskImAlive(void *param)
 	else
 	{
 		printf("Woof %d\n", im_alive);
-		printf("my id %d, partner id: %d \n", getpid(), partner_id);
+		/*printf("my id %d, partner id: %d \n", getpid(), partner_id);*/
 		kill(partner_id, SIGUSR1);
 	}
 
@@ -67,9 +66,11 @@ static int AppTaskIsAlive(void *param)
 		int fork_return_value = 0;
 		printf("Task 2 revive\n");
 		kill(partner_id, SIGKILL);
+		printf("%s\n", ((wd_t *)param)->my_exec);
+		printf("executing %s\n", ((wd_t *)param)->partner_exec);
 		if ((fork_return_value = fork()) == 0)
 		{
-			execl(((wd_t *)param)->filename, ((wd_t *)param)->filename, NULL);
+			execl(((wd_t *)param)->partner_exec, ((wd_t *)param)->partner_exec, ((wd_t *)param)->my_exec, NULL);
 
 		}
 		partner_id = fork_return_value;
@@ -125,7 +126,7 @@ wd_t *WDInit(enum status *status_holder)
 
 		return NULL;
 	}*/
-	SchedulerAddTask(pack->scheduler, &AppTaskIsAlive, (5 * interval), pack);
+	SchedulerAddTask(pack->scheduler, &AppTaskIsAlive, (2 * interval), pack);
 	/*if (UIDIsSame(bad_uid, SchedulerAddTask(pack->scheduler, &AppTaskIsAlive, (5 * interval), pack)))
 	{
 		SchedulerDestroy(pack->scheduler);
@@ -170,7 +171,6 @@ void *WDSchedulerRun(void *pack)
 		/*printf("%d\n", sem_stop_flag_value);*/
 		sem_post(((wd_t *)pack)->p1);
 		sem_wait(((wd_t *)pack)->p2);
-		printf("run %d\n", getpid());
 		SchedulerRun(((wd_t *)pack)->scheduler);
 	}
 

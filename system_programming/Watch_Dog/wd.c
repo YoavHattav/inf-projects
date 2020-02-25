@@ -29,21 +29,6 @@ wd_t *WDStart(const char *filename, enum status *status_holder)
 	wd_t *pack = NULL;
 
 	printf("start func\n");
-	assert(NULL != filename);
-	
-	sem_wd_is_up_flag = sem_open("/sem_wd_is_up_flag", O_CREAT, 0644, 0);
-	sem_getvalue(sem_wd_is_up_flag, &wd_sem_up_value);
-	if (0 == wd_sem_up_value)
-	{
-		printf("exec wd\n");
-		if ((fork_return_value = fork()) == 0)
-		{
-			execl("./wd_out", filename, NULL);
-		}
-		sem_post(sem_wd_is_up_flag);
-	}
-	
-	partner_id = fork_return_value;
 	
 	printf("app id :%d\n", getpid());
 	pack = WDInit(status_holder);
@@ -52,6 +37,30 @@ wd_t *WDStart(const char *filename, enum status *status_holder)
 		printf("failed to init pack in start func\n");
 
 		return NULL;
+	}
+	pack->my_exec = filename;
+	pack->partner_exec = "./wd_out";
+
+	/*printf("%s\n", pack->my_exec);
+	printf("%s\n", pack->partner_exec);*/
+
+	sem_wd_is_up_flag = sem_open("/sem_wd_is_up_flag", O_CREAT, 0644, 0);
+	sem_getvalue(sem_wd_is_up_flag, &wd_sem_up_value);
+
+	if (0 == wd_sem_up_value)
+	{
+		printf("exec wd\n");
+		if ((fork_return_value = fork()) == 0)
+		{
+			sem_post(sem_wd_is_up_flag);
+			execl(pack->partner_exec, pack->partner_exec, pack->my_exec, NULL);
+		}
+
+		partner_id = fork_return_value;
+	}
+	else
+	{
+		partner_id = getppid();
 	}
 
 	pack->p1 = sem_open("/sem_app_is_ready", O_CREAT, 0644, 0);
@@ -74,9 +83,6 @@ wd_t *WDStart(const char *filename, enum status *status_holder)
 
 		return NULL;
 	}
-	
-
-	pack->filename = "./wd_out";
 
 	if (0 != pthread_create(&pack->thread, NULL, &WDSchedulerRun, pack))
 	{
@@ -90,7 +96,7 @@ wd_t *WDStart(const char *filename, enum status *status_holder)
 
 void WDStop(wd_t *pack)
 {
-	time_t sleep_timer = 40;
+	time_t sleep_timer = 100;
 	while(sleep_timer)
 	{
 		sleep_timer = sleep(sleep_timer);

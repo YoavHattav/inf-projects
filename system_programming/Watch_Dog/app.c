@@ -14,7 +14,7 @@ int main(int argc, char const *argv[])
 	wd_t *pack= NULL;
 	enum status status_holder;
 
-	pack = WDStart("./app_out", &status_holder);
+	pack = WDStart(argv[0], &status_holder);
 
 	printf("after start\n");
 

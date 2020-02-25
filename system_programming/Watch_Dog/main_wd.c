@@ -46,7 +46,11 @@ int main(int argc, char const *argv[])
 		return 1;
 	}
 
-	pack->filename = argv[0];
+	pack->partner_exec = argv[1];
+	pack->my_exec = "./wd_out";
+
+	printf("my(wd)%s\n", pack->my_exec);
+	printf("partner%s\n", pack->partner_exec);
 
 	WDSchedulerRun(pack);
 

@@ -13,7 +13,8 @@ struct pack
 	scheduler_t *scheduler;
 	sem_t *p1;
 	sem_t *p2;
-	const char *filename;
+	const char *my_exec;
+	const char *partner_exec;
 	pthread_t thread;
 };
 
