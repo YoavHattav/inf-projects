@@ -6,3 +6,5 @@
 !.gitignore
 !**.md
 !**.mk
+!**.java
+!**.class

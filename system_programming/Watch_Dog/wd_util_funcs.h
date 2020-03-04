@@ -6,6 +6,8 @@
 #include "wd.h"
 #include "../include/scheduler.h"
 
+#define UNUSED(x) (void)(x)
+
 pid_t partner_id;
 sem_t *sem_stop_flag;
 
