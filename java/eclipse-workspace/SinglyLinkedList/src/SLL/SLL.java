@@ -5,11 +5,24 @@ public class SLL {
 	private node head = new node(null, null);
 	
 	public Boolean isEmpty(){
-		return ;
+		return (null == head.nextNode);
 	}
 	
 	public ListIterator find(Object data) {
 		
+		ListIterator itr = begin();
+		ListIterator itrPrev = begin();
+
+		while (itr.hasNext())
+		{
+			if (itr.next().equals(data))
+			{
+				return itrPrev;
+			}
+			itrPrev.next();
+		}
+		
+		return itr;
 	}
 	
 	public int size() {
@@ -22,20 +35,29 @@ public class SLL {
 			++size_counter;
 			itr.next();
 		}
-	}
-	public Object popFront(){
 		
+		return size_counter;
 	}
 	
-	public void pushFront() {
+	public Object popFront(){
 		
+		Object dataHolder = head.getData();
+		head = head.nextNode;
+		
+		return dataHolder;
+	}
+	
+	public void pushFront(Object data) {
+		node new_node = new node(data, head);
+		head = new_node;
 	}
 	
 	public ListIterator begin() {
-		
+		return new listIteratorImp();
 	}
 
 	private class node {
+		
 		private Object data;
 		private node nextNode;
 			
@@ -53,22 +75,25 @@ public class SLL {
 	}
 
 	private class listIteratorImp implements ListIterator {
+		
 		node itr;
-		public listIteratorImp(){
+		
+		public listIteratorImp() {
 			itr = head;
 		}
+		
 		@Override
 		public Object next() {
-			// TODO Auto-generated method stub
-			return null;
+			Object data_holder = itr.getData();
+			itr = itr.nextNode;
+			
+			return data_holder;
 		}
 
 		@Override
 		public boolean hasNext() {
-			// TODO Auto-generated method stub
-			return null;
+			return (null != itr.nextNode);
 		}
-
 	}
 }
 
