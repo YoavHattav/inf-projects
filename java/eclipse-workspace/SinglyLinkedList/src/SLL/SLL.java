@@ -2,10 +2,27 @@ package SLL;
 
 public class SLL {
 	
+	private class node {
+		
+		private Object data;
+		private node nextNode;
+
+		public node(Object data, node nextNode) {
+			this.data = data;
+			this.nextNode = nextNode;
+		}
+			
+		public Object getData() {
+			return data;
+		}
+		public node getNextNode() {
+			return nextNode;
+		}
+	}
 	private node head = new node(null, null);
 	
 	public Boolean isEmpty(){
-		return (null == head.nextNode);
+		return (null == head.getNextNode());
 	}
 	
 	public ListIterator find(Object data) {
@@ -56,43 +73,25 @@ public class SLL {
 		return new listIteratorImp();
 	}
 
-	private class node {
-		
-		private Object data;
-		private node nextNode;
-			
-		public node(Object data, node nextNode) {
-			this.data = data;
-			this.nextNode = nextNode;
-		}
-			
-		public Object getData() {
-			return data;
-		}
-		public node getNextNode() {
-			return nextNode;
-		}
-	}
-
 	private class listIteratorImp implements ListIterator {
 		
-		node itr;
+		node node;
 		
 		public listIteratorImp() {
-			itr = head;
+			node = head;
 		}
 		
 		@Override
 		public Object next() {
-			Object data_holder = itr.getData();
-			itr = itr.nextNode;
+			Object data_holder = node.getData();
+			node = node.getNextNode();
 			
 			return data_holder;
 		}
 
 		@Override
 		public boolean hasNext() {
-			return (null != itr.nextNode);
+			return (null != node.nextNode);
 		}
 	}
 }
