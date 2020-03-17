@@ -1,63 +1,121 @@
+import java.util.ArrayList;
 
 public class VendingMachine {
 
-	public State state;
-	public double balance;
-
-	private enum State {
-		INIT {
-
-			@Override
-			public State initialize() {return WAIT_FOR_COIN;}
-
-			@Override
-			public State gotCoin() {return null;}
-
-			@Override
-			public State gotOrder() {return null;}
-
-		},
-		WAIT_FOR_ORDER {
-
-			@Override
-			public State gotCoin() {return WAIT_FOR_ORDER;}
-
-			@Override
-			public State gotOrder() {return WAIT_FOR_COIN;}
-
-			@Override
-			public State initialize() {return null;}
-
-		},
-		WAIT_FOR_COIN {
-
-			@Override
-			public State initialize() {return null;}
-
-			@Override
-			public State gotCoin() {return WAIT_FOR_ORDER;}
-
-			@Override
-			public State gotOrder() {return WAIT_FOR_COIN;}
-		};
-
-		public abstract State initialize();
-		public abstract State gotCoin();
-		public abstract State gotOrder();
+	private static State state;
+	private double balance;
+	
+	ArrayList<Item> stock = new ArrayList<Item>();
+	
+	public void setNewProduct(Item product) {
+		stock.add(product);
 	}
 	
-	public VendingMachine() {
-		Monitor print_obj = new MonitorIMP();
-		state = State.INIT.initialize();
-		balance = 0;
-		print_obj.write("Hey there, how can i help?");
+	Monitor monitor = null;
+	
+	private enum State {
+		INIT{
+
+			@Override
+			void gotOrder(VendingMachine machine, String order) {
+				state = State.WAIT_FOR_COIN;
+			}
+	
+			@Override
+			void gotCoin(VendingMachine machine, int coin) {
+				state = State.WAIT_FOR_COIN;
+			}
+	
+			@Override
+			void initialize() {
+				state = State.WAIT_FOR_COIN;
+			}
+		},	
+	 
+		WAIT_FOR_COIN
+		 {
+	
+			@Override
+			void gotOrder(VendingMachine machine, String order) {
+				machine.monitor.write("insert coin pls");
+				state = State.WAIT_FOR_COIN;
+			}
+	
+			@Override
+			void gotCoin(VendingMachine machine, int coin) {
+				machine.balance += coin;
+				state = State.WAIT_FOR_ORDER;
+			}
+	
+			@Override
+			void initialize() {
+			}
+		},
+		
+		WAIT_FOR_ORDER
+		 {
+
+			@Override
+			void gotOrder(VendingMachine machine, String order) {
+				final int one = 1;
+				for(Item item : machine.stock) 
+				{
+					if (item.getName() == order)
+					{
+						if (item.getQuantity() >= 1) 
+						{
+							if (machine.balance >= item.getPrice())
+							{	
+								machine.balance -= item.getPrice();
+								item.setQuantity(item.getQuantity() - one);
+								state = State.WAIT_FOR_COIN;
+							}
+							else
+							{
+								machine.monitor.write("insert coin pls");
+								state = State.WAIT_FOR_COIN;
+							}
+						}
+						else
+						{
+							machine.monitor.write("out of stock");
+							state = State.WAIT_FOR_ORDER;
+						}
+					}
+				}
+			}
+
+			@Override
+			void gotCoin(VendingMachine machine, int coin) {
+				machine.balance += coin;
+				state = State.WAIT_FOR_ORDER;
+			}
+
+			@Override
+			void initialize() {
+			}
+			
+		};	
+			
+		abstract void gotOrder(VendingMachine machine, String order);
+		abstract void gotCoin(VendingMachine machine, int coin);
+		abstract void initialize();
+
 	}
-	public State getState() {
-		return state;
+	public VendingMachine(Monitor monitor) {
+		this.monitor = monitor;
+		state = State.INIT;
+		balance = 0;
+	}
+	public void insertCoin(int coin) {
+		state.gotCoin(this, coin);
 	}
 
-	public void setState(State state) {
-		this.state = state;
+	public double placeOrder(String order) {
+		state.gotOrder(this, order);
+		double change = balance;
+		balance = 0;
+		return change;
 	}
 
 	public double getBalance() {
@@ -66,41 +124,5 @@ public class VendingMachine {
 
 	public void setBalance(double balance) {
 		this.balance = balance;
-	}
-
-	public void insertCoin(int coin) {
-		setBalance(coin);
-		state = state.gotCoin();
-	}
-
-	public double placeOrder(String order) {
-		
-		Monitor print_obj = new MonitorIMP();
-		if (state == State.WAIT_FOR_ORDER) {
-			for (Item item : Item.values()) {
-				if (item.name() == order) {
-					if ((balance >= item.getPrice()) && (item.getQuantity() > 0)) {
-						final int one = 1;
-						balance = balance - item.getPrice();
-						item.setQuantity(item.getQuantity() - one);
-						state = state.gotOrder();
-						print_obj.write("enjoy your drink");
-
-						return balance;
-					}
-					else
-					{
-						print_obj.write("Could not complete order");
-					}
-				}
-			}
-		}
-		else
-		{
-			print_obj.write("Insert coin pls");
-		}
-		
-		balance = 0;
-		return balance;
 	}
 }

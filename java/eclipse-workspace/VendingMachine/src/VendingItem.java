@@ -1,34 +1,27 @@
 
-enum Item {
-	COLA(15, 4),
-	ZERO(15, 4),
-	TEA(5, 6),
-	WATER(10, 3),
-	TUTIT(10, 5),
-	MANGO(10,4),
-	FANTA(10, 4);
+class Item {
 	
-	public int price;
-	public int quantity;
+	final String name;
+	final int price;
+	int quantity;
 	
-	private Item(int quantity, int price) {
+	public Item(String name, int price, int quantity) {
+		this.name = name;
 		this.price = price;
 		this.quantity = quantity;
 	}
-	
+	public void setQuantity(int quantity) {
+			this.quantity = quantity;
+	}
+	public int getQuantity() {
+		return quantity;
+	}
+	public String getName() {
+		return name;
+	}
+
 	public int getPrice() {
 		return price;
 	}
 	
-	public int getQuantity() {
-		return quantity;
-	}
-
-	public void setPrice(int price) {
-		this.price = price;
-	}
-
-	public void setQuantity(int quantity) {
-		this.quantity = quantity;
-	}
 }

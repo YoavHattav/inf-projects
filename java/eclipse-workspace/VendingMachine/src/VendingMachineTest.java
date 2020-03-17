@@ -6,40 +6,53 @@ class VendingMachineTest {
 
 	@Test
 	void testInsertCoinAndPlaceOrder() {
-		VendingMachine vendingMachine = new VendingMachine();
+		
+		 class monitorInterface implements Monitor{
 
-		vendingMachine.placeOrder("COLA");	
-		for (Item p : Item.values()) {
-			System.out.print(p + " : ");
-			System.out.println(p.getQuantity());
+			public void write(String msg) {
+				System.out.println(msg);
+			}
 		}
 		
-		vendingMachine.insertCoin(5);
-		assertEquals(vendingMachine.getBalance(), 5);
-
-		for (int i = 0; i < 32; ++i) {
-			/*vendingMachine.insertCoin(4);*/
-			/*assertEquals(vendingMachine.getBalance(), 9);*/
-			vendingMachine.placeOrder("COLA");	
-		}
-			
-
-		for (Item p : Item.values()) {
-			System.out.print(p + " : ");
-			System.out.println(p.getQuantity());
+		Monitor monitor = new monitorInterface();
+		VendingMachine vendingMachine = new VendingMachine(monitor);
+		
+		Item tea = new Item("tea", 4, 15);
+		vendingMachine.setNewProduct(tea);
+		Item cola = new Item("cola", 4, 15);
+		vendingMachine.setNewProduct(cola);
+		
+		vendingMachine.placeOrder("cola");
+		for (Item item : vendingMachine.stock) {
+			System.out.print(item.getName() + " : ");
+			System.out.println(item.getQuantity());
 		}
 		
-		for (Item p : Item.values()) {
-				if (p.name() == "TEA") {
-					p.setQuantity(100);
-					assertEquals(p.getQuantity(), 100);
+		double change = 0;
+		
+		vendingMachine.insertCoin(10);
+		assertEquals(vendingMachine.getBalance(), 10);
+		change = vendingMachine.placeOrder("tea");
+		assertEquals(vendingMachine.getBalance(), 0);
+		System.out.println("change was: "+ change);
+		
+		for (int i = 0; i < 10; ++i) {
+			vendingMachine.insertCoin(10);
+			change = vendingMachine.placeOrder("cola");
+			System.out.println("change was: "+ change);
+			assertEquals(vendingMachine.getBalance(), 0);
+		}	
+
+		for (Item item : vendingMachine.stock) {
+			System.out.print(item.getName() + " : ");
+			System.out.println(item.getQuantity());
+		}
+		
+		for (Item item : vendingMachine.stock) {
+				if (item.getName() == "TUT") {
+					item.setQuantity(100);
+					assertEquals(item.getQuantity(), 100);
 				}
 			}
 	}
 }
-		/*for (product p : vendingMachine.stock) {
-			System.out.print(p + " : ");
-			System.out.println(p.getQuantity());		
-			}*/
-
-
