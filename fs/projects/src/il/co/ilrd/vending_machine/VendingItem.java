@@ -2,9 +2,9 @@ package il.co.ilrd.vending_machine;
 
 class Item {
 	
-	final String name;
-	final int price;
-	int quantity;
+	private final String name;
+	private final int price;
+	private int quantity;
 	
 	public Item(String name, int price, int quantity) {
 		this.name = name;

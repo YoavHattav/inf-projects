@@ -45,7 +45,7 @@ public class VendingMachine {
 	
 			@Override
 			void gotCoin(VendingMachine machine, int coin) {
-				machine.balance += coin;
+				machine.balance = coin;
 				state = State.WAIT_FOR_ORDER;
 			}
 	
