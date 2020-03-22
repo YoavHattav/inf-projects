@@ -4,35 +4,27 @@ import java.util.LinkedList;
 
 public class ProdCons3_2_1 {
 	
-	LinkedList<Integer> list = new LinkedList<Integer>();
+	static LinkedList<Integer> list = new LinkedList<Integer>();
 	Object lock = new Object();
 	Integer number = 5;
 	
 	public class Consumer implements Runnable {
 		@Override
 		public void run() {
-			while (true)
-			{
-				synchronized (lock) {
-					System.out.println("add");
-					list.add(number);
-				}
+			synchronized (lock) {
+				System.out.println("add");
+				list.add(number);
 			}
 		}
 	}
 	public class Producer implements Runnable {
 		@Override
 		public void run() {
-			while (true)
-			{
-				while (list.isEmpty())
-				{
-					synchronized (lock) {
-						System.out.println("remove" + list.remove());
-					}
-				}
-			}
 			
+		while (list.isEmpty()){}
+			synchronized (lock) {
+				System.out.println("remove" + list.remove());
+			}
 		}
 	}
 	public static void main(String[] args) {

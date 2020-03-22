@@ -4,7 +4,6 @@ import java.util.concurrent.*;
 
 public class ProdCons3_1_2 {
 	
-	volatile static int x = 0;
 	volatile static boolean flag = true;
 	
 	private final static Semaphore sem_1 = new Semaphore(1);

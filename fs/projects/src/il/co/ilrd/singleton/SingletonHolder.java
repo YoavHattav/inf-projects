@@ -1,4 +1,4 @@
-package il.co.ilrd.singlton;
+package il.co.ilrd.singleton;
 
 public class SingletonHolder {
 	private int x; 
@@ -8,10 +8,10 @@ public class SingletonHolder {
 	}
 	
 	private static class Singleton {
-		public static Singleton instance = new Singleton();
+		public static SingletonHolder instance = new SingletonHolder();
 	}
 	
-	public static Singleton getInstance() {
+	public static SingletonHolder getInstance() {
 		return Singleton.instance;
 	}
 	
