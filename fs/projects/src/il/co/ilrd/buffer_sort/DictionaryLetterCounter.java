@@ -1,7 +1,7 @@
 package il.co.ilrd.buffer_sort;
 
 public class DictionaryLetterCounter {
-	private static final int NUM_OF_THREADS = 10;
+	private static final int NUM_OF_THREADS = 2;
 	private static char[] dictio_array;
 	static final String words_path = "/usr/share/dict/words";
 	static long startTime;
@@ -56,7 +56,7 @@ public class DictionaryLetterCounter {
 	public static void main(String[] args) {
 		
 		String final_product = new String();
-		final_product = (new DictionaryLetterCounter()).Sort();
+		final_product = final_product + (new DictionaryLetterCounter()).Sort();
 		long endTime = System.currentTimeMillis();
 		System.out.println("Total execution time: " + (endTime - startTime));
 	}
