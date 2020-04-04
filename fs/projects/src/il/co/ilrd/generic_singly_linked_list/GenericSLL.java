@@ -1,11 +1,12 @@
 package il.co.ilrd.generic_singly_linked_list;
 
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
 public class GenericSLL<T> implements Iterable<T> {
 	
 	private Node<T> head = new Node<>(null, null);
-	private boolean modCount = false;
+	private volatile int modCount = 0;
 
 	private static class Node<T> {
 		
@@ -20,10 +21,6 @@ public class GenericSLL<T> implements Iterable<T> {
 		public T getData() {
 			return data;
 		}
-		
-		public void setNextNode(Node<T> nextNode) {
-			this.nextNode = nextNode;
-		}
 
 		public Node<T> getNextNode() {
 			return nextNode;
@@ -31,46 +28,111 @@ public class GenericSLL<T> implements Iterable<T> {
 	}
 	
 	public void pushFront(T data) {
-		modCount = true;
-        Node<T> newNode = new Node<>(data, head.nextNode);
-        head.nextNode = newNode;
-        System.out.println("HERE");
+		++modCount;
+        Node<T> newNode = new Node<>(data, head);
+        head = newNode;
 	}
+	
 	public T popFront() {
 		
+		if(!isEmpty()) {
+			++modCount;
+			T data = head.data;
+			head = head.nextNode;
+
+			return data;	
+		}
+		
+		throw new NullPointerException();
 	}
+	
 	public int size() {
+		int counter = 0;
+		listIteratorImp<T> itr = new listIteratorImp<T>(this);
 		
+		while (itr.hasNext())
+		{
+			++counter;
+			itr.next();
+		}
+		
+		return counter;
 	}
-	public boolean isEmpty() {
-		
+	
+	public Boolean isEmpty(){
+		return (null == head.getNextNode());
 	}
-	public Iterator<T> find() {
-		
+	
+	public Iterator<T> find(T data) {
+		listIteratorImp<T> itr = new listIteratorImp<T>(this);
+		while ((itr.hasNext()) && !(itr.curr_node.data.equals(data)))
+		{
+			itr.next();
+		}
+		return itr;
 	}
 	
 	public static <E> GenericSLL<E> merge(GenericSLL<E> one, GenericSLL<E> two) {
 		
+		GenericSLL<E> new_sll = new GenericSLL<E>();
+		
+		for (E elem : one)
+		{
+			new_sll.pushFront(elem);
+		}
+		for (E elem : two)
+		{
+			new_sll.pushFront(elem);
+		}
+		
+		return new_sll;
 	}
 	
 	public static <E> GenericSLL<E> newReverse(GenericSLL<E> sll) {
+		GenericSLL<E> new_sll = new GenericSLL<E>();
+		for (E elem : sll)
+		{
+			new_sll.pushFront(elem);
+		}
 		
+		return new_sll;
 	}
 	
 	public static <E> void print(GenericSLL<E> sll) {
 		
+		for (E elem : sll)
+		{
+			System.out.println(elem.toString());
+		}
 	}
 	
-	private class listIteratorImp implements Iterator<T>{
+	@Override
+	public Iterator<T> iterator() {
+		return new listIteratorImp<T>(this);
+	}
+	
+	private static class listIteratorImp<T> implements Iterator<T>{
 		
 		private Node<T> curr_node;
-		
-		public listIteratorImp() {
-			curr_node = head;
-		}
+		GenericSLL<T> list;
+		private volatile int itr_modCount;
+
+		private listIteratorImp(GenericSLL<T> list) {
+	        curr_node = list.head;
+	        this.list = list;
+	        itr_modCount = list.modCount;
+	    }
 		
 		@Override
 		public T next() {
+			
+			if (itr_modCount != list.modCount) {
+	            throw new ConcurrentModificationException("ERROR: Data Structre have been modified");
+	        }
+	        if (list.isEmpty()) {
+	            throw new NullPointerException("Can't Iter on empty list");
+	        }
+	        
 			T data_holder = curr_node.getData();
 			curr_node = curr_node.getNextNode();
 			
@@ -79,12 +141,11 @@ public class GenericSLL<T> implements Iterable<T> {
 
 		@Override
 		public boolean hasNext() {
-			return (null != curr_node.nextNode);
+			if (itr_modCount != list.modCount) {
+	            throw new ConcurrentModificationException("ERROR: Data Structre have been modified");
+	        }
+	        return(null != curr_node.nextNode);
 		}
 	}
-
-	@Override
-	public Iterator<T> iterator() {
-		return null;
-	}
 }
+
