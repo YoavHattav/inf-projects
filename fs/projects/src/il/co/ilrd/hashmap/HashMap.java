@@ -18,10 +18,7 @@ public class HashMap<K,V> implements Map<K, V>{
 	private List<List<Pair<K, V>>> hashMap;
 	private final int capacity;
 	private final static int DEFAULT_VALUE = 16;
-	private Set<Map.Entry<K, V>> entrySet = null;
-	private Set<K> keySet = null;
-	private Collection<V> vCollection = null;
-	protected int currentMode = 0;
+	private int currentMode = 0;
 	
 	public HashMap() {
 		this(DEFAULT_VALUE);
@@ -46,14 +43,17 @@ public class HashMap<K,V> implements Map<K, V>{
 	@Override
 	public boolean containsKey(Object key) {
 		
-		List<Pair<K, V>> bucket = hashMap.get(getBucket(key));
-		for (Pair<K, V> entry : bucket)
+		Pair<K, V> entry = getEntry(key);
+		
+		if (null == entry)
 		{
-			if (entry.getKey().equals(key))
-			{
-				return true;
-			}
+			return false;
 		}
+		if (entry.getKey().equals(key))
+		{
+			return true;
+		}
+		
 		return false;
 	}
 
@@ -72,11 +72,8 @@ public class HashMap<K,V> implements Map<K, V>{
 
 	@Override
 	public Set<Map.Entry<K, V>> entrySet() {
-		if (entrySet == null) {
-			entrySet = new EntrySet();
-		}
 		
-		return entrySet;
+		return new EntrySet();
 	}
 
 	@Override
@@ -97,18 +94,16 @@ public class HashMap<K,V> implements Map<K, V>{
 
 	@Override
 	public Set<K> keySet() {
-		if (keySet == null) {
-			keySet = new KeySet();
-		}
 		
-		return keySet;
+		return new KeySet();
 	}
 
 	@Override
 	public V put(K key, V value) {
 		
 		List<Pair<K, V>> bucket = hashMap.get(getBucket(key));
-		
+		++currentMode;
+
 		for (Pair<K, V> entry : bucket) {
 			if (entry.getKey().equals(key)) {
 				return entry.setValue(value);
@@ -121,6 +116,7 @@ public class HashMap<K,V> implements Map<K, V>{
 
 	@Override
 	public void putAll(Map<? extends K, ? extends V> m) {
+		++currentMode;
 		for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
 			put(entry.getKey(), entry.getValue());
 		}
@@ -148,11 +144,8 @@ public class HashMap<K,V> implements Map<K, V>{
 
 	@Override
 	public Collection<V> values() {
-		if (vCollection == null) {
-			vCollection = new ValueCollection();
-		}
 		
-		return vCollection;
+		return new ValueCollection();
 	}
 	
 	private int getBucket(Object key){
@@ -175,10 +168,11 @@ public class HashMap<K,V> implements Map<K, V>{
 
 	private class EntrySet extends AbstractSet<Map.Entry<K, V>>{
 		
-		private int expectedMode = currentMode;
+		private int expectedMode;
 
 		@Override
 		public Iterator<Map.Entry<K, V>> iterator() {
+			expectedMode = currentMode;
 			return new EntryIterator();
 		}
 

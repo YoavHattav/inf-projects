@@ -7,7 +7,7 @@ public class VendingMachine {
 	private static State state;
 	private double balance;
 	
-	ArrayList<Item> stock = new ArrayList<Item>();
+	public ArrayList<Item> stock = new ArrayList<Item>();
 	
 	public void setNewProduct(Item product) {
 		stock.add(product);

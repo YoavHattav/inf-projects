@@ -1,8 +1,12 @@
-package il.co.ilrd.vending_machine;
+package il.co.ilrd.tests;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+
+import il.co.ilrd.vending_machine.Item;
+import il.co.ilrd.vending_machine.Monitor;
+import il.co.ilrd.vending_machine.VendingMachine;
 
 class VendingMachineTest {
 

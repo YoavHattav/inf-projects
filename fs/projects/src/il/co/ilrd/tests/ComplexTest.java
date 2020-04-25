@@ -1,8 +1,10 @@
-package il.co.ilrd.complex;
+package il.co.ilrd.tests;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
+
+import il.co.ilrd.complex.Complex;
 
 class ComplexTest {
 

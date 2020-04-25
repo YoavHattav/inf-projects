@@ -1,10 +1,12 @@
-package il.co.ilrd.generic_singly_linked_list;
+package il.co.ilrd.tests;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Iterator;
 
 import org.junit.jupiter.api.Test;
+
+import il.co.ilrd.generic_singly_linked_list.GenericSLL;
 
 class GenericSLLTest {
 
