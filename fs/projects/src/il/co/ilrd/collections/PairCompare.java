@@ -1,4 +1,4 @@
-package il.co.ilrd.pair;
+package il.co.ilrd.collections;
 
 import java.util.Comparator;
 

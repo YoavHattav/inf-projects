@@ -9,8 +9,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import il.co.ilrd.hashmap.HashMap;
-import il.co.ilrd.pair.Pair;
+import il.co.ilrd.collections.HashMap;
+import il.co.ilrd.collections.Pair;
 
 class testMap {
 

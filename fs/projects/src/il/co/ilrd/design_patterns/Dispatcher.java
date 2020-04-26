@@ -9,6 +9,9 @@ public class Dispatcher<T> {
 	private List<Callback<T>> callbackList = new LinkedList<>();
 	
 	public void register(Callback<T> cb) {
+		if (null == cb) {
+			throw new NullPointerException();
+		}
 		cb.dispatcher = this;
 		callbackList.add(cb);
 	}

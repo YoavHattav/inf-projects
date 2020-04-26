@@ -1,7 +1,10 @@
-package il.co.ilrd.pair;
+package il.co.ilrd.tests;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import il.co.ilrd.collections.Pair;
+import il.co.ilrd.collections.PairCompare;
 
 public class PairTest implements Comparable<PairTest>{
 	
