@@ -1,47 +1,72 @@
 package il.co.ilrd.collections;
 
 import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.concurrent.Semaphore;
-
-public class WaitableQueue<E>{
-	private Queue<E> queue;
-	private final Semaphore sem = new Semaphore(0);
 	
-	public WaitableQueue(Comparator<E> compare) {
-		queue = new PriorityQueue<>(compare);
-	}
+public class WaitableQueue<E> {
+	private Queue<E> queue;
+	private  final int DEFAULT_CAPACITY; 
 	
 	public WaitableQueue() {
-		this(new Comparator<>());
+		DEFAULT_CAPACITY = 11; 
+		queue = new PriorityQueue<>(DEFAULT_CAPACITY);
 	}
+	
+	public WaitableQueue(int DEFAULT_CAPACITY, Comparator<E> comparator) {
+		this.DEFAULT_CAPACITY = DEFAULT_CAPACITY;
+		queue = new PriorityQueue<E>(DEFAULT_CAPACITY,comparator);
+	}
+	
 	/**
-	 * 
-	 * synchronized on ???
-	 * @return
+	 * add the element given to the queue
+	 * @param element
 	 */
 	public void enqueue(E element) {
-		
-		//sem.release();
-		
+		synchronized(this) {
+			try {
+				queue.add(element);
+				
+			} catch (ClassCastException e) { 
+				System.out.println("ClassCastException");
+			
+			} catch (NullPointerException n) {
+				System.out.println("NullPointerException");
+			}
+			
+			notify();
+		}	
 	}
+	
 	/**
 	 * blocking if the queue is empty, will return E element
-	 * @return
+	 * @return the element dequeued
 	 * @throws InterruptedException 
 	 */
-	public E dequeue() throws InterruptedException {
+	public  synchronized E dequeue() throws InterruptedException {
+		while (queue.isEmpty()) {
+				wait();
+		}
 		
-		//sem.acquire();
-		
-		return null;
+		return queue.remove();
 	}
-	//blocking if the queue is empty for maximum of timeInSeconds seconds,
-	//will return E element or null timeout 
-	public E dequeueWithTimeot(int timeInSeconds) throws InterruptedException{
+	
+	/**
+	 * blocking if the queue is empty for maximum of timeInSeconds seconds 
+	 * @param timeInSeconds
+	 * @return E element or null if the waiting time ends
+	 * @throws InterruptedException 
+	 */
+	public E dequeueWithTimeout(long timeInMillSeconds) throws InterruptedException{
+		long startTime = System.currentTimeMillis();
+		while (timeInMillSeconds > System.currentTimeMillis() - startTime) {
+			synchronized(this) {
+				if(!queue.isEmpty()) {
+					return queue.remove();
+				}	
+			}
+		}
+		
 		return null;
 	}
 }

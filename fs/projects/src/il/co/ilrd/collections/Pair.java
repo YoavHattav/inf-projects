@@ -12,20 +12,25 @@ public class Pair<K, V> implements Map.Entry<K, V>{
 		this.key = key;
 		this.value = value;
 	}
+	
 	public static<K, V> Pair<K, V> of(K key, V value) {
 		return new Pair<K, V>(key, value);
 	}
+	
 	public static<K, V> Pair<V, K> swap(Pair<K, V> pair) {
 		return new Pair<V, K> (pair.getValue(), pair.getKey());
 	}
+	
 	@Override
 	public K getKey() {
 		return this.key;
 	}
+	
 	@Override
 	public V getValue() {
 		return this.value;
 	}
+	
 	@Override
 	public V setValue(V value) {
 		V oldValueHolder = this.value;
@@ -33,12 +38,14 @@ public class Pair<K, V> implements Map.Entry<K, V>{
 		
 		return oldValueHolder;
 	}
+	
 	public K setKey(K key) {
 		K oldKeyHolder = this.key;
 		this.key = key;
 		
 		return oldKeyHolder;
 	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -47,6 +54,7 @@ public class Pair<K, V> implements Map.Entry<K, V>{
 		result = prime * result + ((value == null) ? 0 : value.hashCode());
 		return result;
 	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -68,10 +76,12 @@ public class Pair<K, V> implements Map.Entry<K, V>{
 			return false;
 		return true;
 	}
+	
 	@Override
 	public String toString() {
 		return "Pair [key=" + key + ", value=" + value + "]";
 	}
+	
 	public static<T extends Comparable<T>> Pair<T, T> minMax(T[] array) {
 		
 		T min;
