@@ -3,6 +3,7 @@ package il.co.ilrd.collections;
 import java.util.Comparator;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 	
 public class WaitableQueue<E> {
 	private Queue<E> queue;
@@ -41,7 +42,7 @@ public class WaitableQueue<E> {
 	/**
 	 * blocking if the queue is empty, will return E element
 	 * @return the element dequeued
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 */
 	public  synchronized E dequeue() throws InterruptedException {
 		while (queue.isEmpty()) {
@@ -55,11 +56,11 @@ public class WaitableQueue<E> {
 	 * blocking if the queue is empty for maximum of timeInSeconds seconds 
 	 * @param timeInSeconds
 	 * @return E element or null if the waiting time ends
-	 * @throws InterruptedException 
+	 * @throws InterruptedException
 	 */
-	public E dequeueWithTimeout(long timeInMillSeconds) throws InterruptedException{
+	public E dequeueWithTimeout(long timeInMillSeconds,  TimeUnit unit) throws InterruptedException{
 		long startTime = System.currentTimeMillis();
-		while (timeInMillSeconds > System.currentTimeMillis() - startTime) {
+		while (unit.toSeconds(timeInMillSeconds) > System.currentTimeMillis() - startTime) {
 			synchronized(this) {
 				if(!queue.isEmpty()) {
 					return queue.remove();
