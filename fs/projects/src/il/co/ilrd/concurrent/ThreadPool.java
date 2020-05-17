@@ -91,7 +91,7 @@ public class ThreadPool {
 					future.return_value = cb.call();
 					future.future_latch.countDown();
 				} catch (Exception e) {
-					e.printStackTrace();
+					future.e = e;
 				}
 			}
 		}
@@ -106,6 +106,7 @@ public class ThreadPool {
 		private boolean is_done = false;
 		private boolean is_caneled = false;
 		private E return_value = null;
+		private Exception e;
 		private CountDownLatch future_latch = new CountDownLatch(1);
 		
 		
@@ -149,6 +150,9 @@ public class ThreadPool {
 				throws InterruptedException, ExecutionException, TimeoutException {
 			if (isCancelled()) {
 				 throw new CancellationException("the task could not complete, it was canceled");
+			}
+			if (e != null) {
+				throw (RuntimeException)e;
 			}
 			if(future_latch.await(timeout, unit)) {
 				return return_value;

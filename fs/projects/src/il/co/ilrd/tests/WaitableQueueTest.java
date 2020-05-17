@@ -61,7 +61,7 @@ class WaitableQueueTest {
 		public void run() {
 			
 				try {
-					num = queue.dequeueWithTimeout(time_to_wait);
+					num = queue.dequeueWithTimeout(time_to_wait, new TimeU);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

@@ -15,6 +15,7 @@ public class Dispatcher<T> {
 		cb.dispatcher = this;
 		callbackList.add(cb);
 	}
+	
 	public void stopAll() {
 		for (Callback<T> cb : callbackList) {
 			cb.notifyDeath();
