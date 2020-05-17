@@ -6,8 +6,8 @@ import java.util.Map;
 
 public class ChatServerHub implements ChatServer{
 	
-	private Collection<User> users;
-	private Collection<Group> groups;
+	private Map<Integer, User> users;
+	private Map<Integer, Group> groups;
 	
 	@Override
 	public void logIn(String email, String name, Peer p) {
@@ -16,45 +16,50 @@ public class ChatServerHub implements ChatServer{
 	}
 
 	@Override
-	public void createNewGroup(String userId, String groupName) {
+	public void createNewGroup(Integer userId, String groupName) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void joinGroup(String userId, String groupId) {
+	public void joinGroup(Integer userId, Integer groupId) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void leaveGroup(String userId, String groupId) {
+	public void leaveGroup(Integer userId, Integer groupId) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void sendMsg(String userId, String groupId, String msg) {
+	public void sendMsg(Integer userId, Integer groupId, String msg) {
 		// TODO Auto-generated method stub
 		
 	}
+	
 	private static class User {
-		String name;
-		String email;
-		int id;
-		Peer peer;
+		private String name;
+		private String email;
+		private int id;
+		private Peer peer;
+		private static int counter;
 		
 		public User(String name, String email, Peer peer) {
 			this.name = name;
 			this.email = email;
 			this.id = 007; //generate..;
 			this.peer = peer;
-		}
-		
-		
+		}	
 	}
+	
 	private static class Group {
-		Map<Integer, Color> users;
-		
+		Map<Integer, UsrProperties> users;
+	
+	}
+	
+	private static class ColorUsrProperties implements UsrProperties{
+		Color color;
 	}
 }
