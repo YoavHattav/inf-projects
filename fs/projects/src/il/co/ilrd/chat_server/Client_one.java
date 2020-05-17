@@ -11,7 +11,7 @@ public class Client_one {
 			SocketChannel socketChannel = SocketChannel.open();
 			socketChannel.connect(new InetSocketAddress("localhost", 80));
 			socketChannel.configureBlocking(false);
-			String logInData = "[1][yoavhattav@gmail.com][yoav]";
+			String logInData = "[][yoavhattav@gmail.com][yoav]";
 			ByteBuffer buf = ByteBuffer.allocate(1024);
 			buf.clear();
 			buf.put(logInData.getBytes());
