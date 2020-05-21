@@ -1,5 +1,7 @@
 package il.co.ilrd.tests;
 
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.Test;
 
 import il.co.ilrd.collections.WaitableQueue;
@@ -60,8 +62,8 @@ class WaitableQueueTest {
 		@Override
 		public void run() {
 			
-				try {
-					num = queue.dequeueWithTimeout(time_to_wait, new TimeU);
+				try {                                             // updated to compile, if doesnt work as expected - thats the problem.
+					num = queue.dequeueWithTimeout(time_to_wait, TimeUnit.DAYS);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

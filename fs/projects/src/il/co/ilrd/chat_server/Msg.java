@@ -1,9 +1,11 @@
 package il.co.ilrd.chat_server;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
-class Msg implements Serializable {
+import il.co.ilrd.chat_server.ChatOps;
+
+public class Msg implements Serializable {
 	/**
 	 * 
 	 */
@@ -30,6 +32,7 @@ class Msg implements Serializable {
 		return OpId;
 	}	
 }
+
 class Request extends Msg{
     public Request(ChatOps opId) {
         super(opId);
@@ -56,8 +59,9 @@ class RequestLogin extends Request {
 	private static final long serialVersionUID = -2309362424242713828L;
 	private String email;
 	private String userName;
+	private static final ChatOps opId = ChatOps.LOGIN;
 	
-	public RequestLogin(ChatOps opId, String email, String userName) {
+	public RequestLogin(String email, String userName) {
 		super(opId);
 		this.email = email;
 		this.userName = userName;
@@ -71,29 +75,6 @@ class RequestLogin extends Request {
 		return userName;
 	}
 }
-	
-class RequestJoinGroup extends Request {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -6996446904646899058L;
-	private int userId;
-	private String groupName;
-	
-	public RequestJoinGroup(ChatOps opId, int userId, String groupName) {
-		super(opId);
-		this.userId = userId;
-		this.groupName = groupName;
-	}
-	
-	public int getUserId() {
-		return userId;
-	}
-
-	public String getGroupName() {
-		return groupName;
-	}
-}
 
 class RequestCreateGroup extends Request {
 	/**
@@ -102,8 +83,9 @@ class RequestCreateGroup extends Request {
 	private static final long serialVersionUID = -63878996156234175L;
 	private int userId;
 	private String groupName;
+	private static final ChatOps opId = ChatOps.CREATE_GROUP;
 	
-	public RequestCreateGroup(ChatOps opId, int userId, String groupName) {
+	public RequestCreateGroup(int userId, String groupName) {
 		super(opId);
 		this.userId = userId;
 		this.groupName = groupName;
@@ -113,6 +95,30 @@ class RequestCreateGroup extends Request {
 		return userId;
 	}
 	
+	public String getGroupName() {
+		return groupName;
+	}
+}
+
+class RequestJoinGroup extends Request {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6996446904646899058L;
+	private int userId;
+	private String groupName;
+	private static final ChatOps opId = ChatOps.JOIN_GROUP;
+	
+	public RequestJoinGroup(int userId, String groupName) {
+		super(opId);
+		this.userId = userId;
+		this.groupName = groupName;
+	}
+	
+	public int getUserId() {
+		return userId;
+	}
+
 	public String getGroupName() {
 		return groupName;
 	}
@@ -125,8 +131,9 @@ class RequestLeaveGroup extends Request {
 	private static final long serialVersionUID = -2400967658850667596L;
 	private int userId;
 	private String groupName;
+	private static final ChatOps opId = ChatOps.LEAVE_GROUP;
 	
-	public RequestLeaveGroup(ChatOps opId, int userId, String groupName) {
+	public RequestLeaveGroup(int userId, String groupName) {
 		super(opId);
 		this.userId = userId;
 		this.groupName = groupName;
@@ -149,8 +156,9 @@ class RequestSend extends Request {
 	private int userId;
 	private String groupName;
 	private String msg;
+	private static final ChatOps opId = ChatOps.SEND_MSG;
 	
-	public RequestSend(ChatOps opId, int userId, String groupName, String msg) {
+	public RequestSend(int userId, String groupName, String msg) {
 		super(opId);
 		this.userId = userId;
 		this.groupName = groupName;
@@ -176,9 +184,10 @@ class ResponseLogin extends Response {
 	 */
 	private static final long serialVersionUID = -5773082868149152439L;
 	private int userId;
-	private List<String> groups;
+	private Set<String> groups;
+	private static final ChatOps opId = ChatOps.LOGIN;
 	
-	public ResponseLogin(ChatOps opId, int requestMsgID, Status status, int userId, List<String> groups) {
+	public ResponseLogin(int requestMsgID, int userId, Set<String> groups, Status status) {
 		super(opId, requestMsgID, status);
 		this.userId = userId;
 		this.groups = groups;
@@ -188,8 +197,32 @@ class ResponseLogin extends Response {
 		return userId;
 	}
 
-	public List<String> getGroups() {
+	public Set<String> getGroups() {
 		return groups;
+	}
+}
+
+class ResponseCreateGroup extends Response {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -838016303129502199L;
+	private int userId;
+	private String groupName;
+	private static final ChatOps opId = ChatOps.CREATE_GROUP;
+	
+	public ResponseCreateGroup(int requestMsgID, String groupName, Status status) {
+		super(opId, requestMsgID, status);
+		this.userId = userId;
+		this.groupName = groupName;
+	}
+
+	public int getUserId() {
+		return userId;
+	}
+
+	public String getGroupName() {
+		return groupName;
 	}
 }
 
@@ -201,8 +234,9 @@ class ResponseJoinGroup extends Response {
 	private int userId;
 	private String groupName;
 	private String senderName;
+	private static final ChatOps opId = ChatOps.JOIN_GROUP;
 	
-	public ResponseJoinGroup(ChatOps opId, int requestMsgID, Status status, int userId, String groupName, String senderName) {
+	public ResponseJoinGroup(int requestMsgID, int userId, String groupName, String senderName, Status status) {
 		super(opId, requestMsgID, status);
 		this.userId = userId;
 		this.groupName = groupName;
@@ -221,29 +255,6 @@ class ResponseJoinGroup extends Response {
 	}
 }
 
-class ResponseCreateGroup extends Response {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -838016303129502199L;
-	private int userId;
-	private String groupName;
-	
-	public ResponseCreateGroup(ChatOps opId, int requestMsgID, Status status, int userId, String groupName) {
-		super(opId, requestMsgID, status);
-		this.userId = userId;
-		this.groupName = groupName;
-	}
-
-	public int getUserId() {
-		return userId;
-	}
-
-	public String getGroupName() {
-		return groupName;
-	}
-}
-
 class ResponseLeaveGroup extends Response {
 	/**
 	 * 
@@ -252,8 +263,9 @@ class ResponseLeaveGroup extends Response {
 	private int userId;
 	private String groupName;
 	private String senderName;
+	private static final ChatOps opId = ChatOps.LEAVE_GROUP;
 	
-	public ResponseLeaveGroup(ChatOps opId, int requestMsgID, Status status, int userId, String groupName, String senderName) {
+	public ResponseLeaveGroup(int requestMsgID, int userId, String groupName, String senderName, Status status) {
 		super(opId, requestMsgID, status);
 		this.userId = userId;
 		this.groupName = groupName;
@@ -284,8 +296,9 @@ class ResponseSend extends Response {
 	private String msg;
 	private String senderName;
 	private UsrProperties prop;
+	private static final ChatOps opId = ChatOps.SEND_MSG;
 	
-	public ResponseSend(ChatOps opId, int requestMsgID, Status status, int userId, String groupName, String msg, String senderName, UsrProperties prop) {
+	public ResponseSend(int requestMsgID, int userId, String groupName, String msg, String senderName, UsrProperties prop, Status status) {
 		super(opId, requestMsgID, status);
 		this.userId = userId;
 		this.groupName = groupName;

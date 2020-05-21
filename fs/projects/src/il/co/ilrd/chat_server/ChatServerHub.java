@@ -107,7 +107,6 @@ public class ChatServerHub implements ChatServer{
 			this.email = email;
 			this.id = ++counter;
 			this.peer = peer;
-			
 		}	
 	}
 	

@@ -1,6 +1,11 @@
 package il.co.ilrd.chat_server;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.nio.ByteBuffer;
@@ -10,116 +15,151 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.StringTokenizer;
 
 public class TCPCommunication implements Communication {
-	
-	private ChatServer server;
-	private SocketChannel client = null;
-	
-	public TCPCommunication(ChatServer server) {
+	private volatile boolean runFlag = true;
+	private Selector selector;
+	ChatServer server;
+	int portNum;
+	private ServerSocketChannel serverChannel;
+	private ServerSocket serverSocket;
+	private SocketChannel channel;
+		
+	public TCPCommunication(ChatServer server,int portNum) {
 		this.server = server;
-		new Thread(()-> Init()).start();
+		this.portNum = portNum;
+		Init();
 	}
 	
 	@Override
 	public void Init() {
 		try {
-			Selector selector = Selector.open();
-			ServerSocketChannel socket = ServerSocketChannel.open();
-			ServerSocket serverSocket = socket.socket();
-			serverSocket.bind(new InetSocketAddress("localhost", 8089));
-			 socket.configureBlocking(false);
-			 socket.register(selector, SelectionKey.OP_ACCEPT);
-			 while (true) {
-				 selector.select();
-				 Set<SelectionKey> selectedKeys = selector.selectedKeys();
-				 Iterator<SelectionKey> readyChannelIterator = selectedKeys.iterator();
-		
-				 while (readyChannelIterator.hasNext()) {
-					 SelectionKey key = readyChannelIterator.next();
-		          
-					 if (key.isAcceptable()) {
-					        client = socket.accept();
-					        client.configureBlocking(false);
-					        client.register(selector, SelectionKey.OP_READ);			       
-					 }
-					 
-					 else if (key.isReadable()) {
-						 client = (SocketChannel) key.channel();
-						 ByteBuffer buffer = ByteBuffer.allocate(1024);
-					     client.read(buffer);
-					     buffer.flip();
-					     String recievedMsg = new String(buffer.array()).trim();
-					     StringTokenizer st = new StringTokenizer(recievedMsg, "[]");
-					     Function.valueOf(st.nextToken()).activateServerFunction(this, st, new SocketPeer(client));
-					     buffer.clear();
-				     }
-					 readyChannelIterator.remove();
-				 }
-			 }
-			
+			selector = Selector.open();
+			serverChannel = ServerSocketChannel.open();
+			serverSocket = serverChannel.socket();
+			serverSocket.bind(new InetSocketAddress("localhost", portNum));
+			serverChannel.configureBlocking(false);
+			serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 		} catch (IOException e) {
+			System.err.println(e.getMessage());
 			e.printStackTrace();
 		}
-		
-	}
-	private enum Function {
-		LOGIN        (1){
-			@Override
-			void activateServerFunction(TCPCommunication communication, StringTokenizer st, Peer peer) {
-				communication.server.logIn(st.nextToken(), st.nextToken(), peer);}},
-		ADD_TO_GROUP (2) {
-			@Override
-			void activateServerFunction(TCPCommunication communication, StringTokenizer st, Peer peer) {
-				communication.server.joinGroup(Integer.parseInt(st.nextToken()), Integer.parseInt(st.nextToken()));}},
-		SEND         (3) {
-				@Override
-				void activateServerFunction(TCPCommunication communication, StringTokenizer st, Peer peer) {
-					communication.server.sendMsg(Integer.parseInt(st.nextToken()), Integer.parseInt(st.nextToken()), st.nextToken());}},
-		CREATE_GROUP (4) {
-					@Override
-					void activateServerFunction(TCPCommunication communication, StringTokenizer st, Peer peer) {
-						communication.server.createNewGroup(Integer.parseInt(st.nextToken()), st.nextToken());}},
-		LEAVE_GROUP  (5) {
-						@Override
-						void activateServerFunction(TCPCommunication communication, StringTokenizer st, Peer peer) {
-							communication.server.leaveGroup(Integer.parseInt(st.nextToken()), Integer.parseInt(st.nextToken()));}};
-		
-		private int functionNum;
-		private Function(int functionNum) {
-			this.functionNum = functionNum;		
-		}
+		try {
+			while(true) {
 
-		abstract void activateServerFunction(TCPCommunication communication, StringTokenizer st, Peer peer);
+				selector.select();
+				Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
+
+				while(keyIterator.hasNext()) {
+					SelectionKey currentKey = keyIterator.next();
+					if (currentKey.isAcceptable()) {
+						System.out.println("accepted");
+						ServerSocketChannel server = (ServerSocketChannel) currentKey.channel();
+						SocketChannel client = server.accept();
+						client.configureBlocking(false);
+						client.register(selector, SelectionKey.OP_READ, ByteBuffer.allocate(2000));
+					}
+					else if(currentKey.isReadable()) {
+						System.out.println("reading");
+						channel = (SocketChannel) currentKey.channel();
+						ByteBuffer buffer = (ByteBuffer)currentKey.attachment();
+						Request request = null;
+						channel.read(buffer);
+						ByteArrayInputStream bis = new ByteArrayInputStream(buffer.array());
+			            ObjectInputStream ois = new ObjectInputStream(bis);
+						request = (Request)ois.readObject();
+						ChatOps.valueOf(request.getOpId().toString()).handleMsg(request, channel, this);
+					}
+					keyIterator.remove(); 
+				}
+			}
+		} catch (IOException | ClassNotFoundException e) {
+			e.printStackTrace();
+		} 
 	}
 	
-	private class SocketPeer implements Peer {
-
-		private SocketChannel clientSocket = null;
+	class SocketPeer implements Peer {
+		private SocketChannel clientSocket;
 
 		public SocketPeer(SocketChannel clientSocket) {
 			this.clientSocket = clientSocket;
 		}
-		
+
 		@Override
-		public void sendMessage(String senderName, int groupID, UsrProperties prop, String message) {
+		public void responseLogin(int msgID, int userID, Set<String> groupNames, Status status) {
+			ResponseLogin response = new ResponseLogin(msgID, userID, groupNames, status);
+
+			try (OutputStream ops = clientSocket.socket().getOutputStream();
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+				baos.writeTo(ops);
+				oos.writeObject(response);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
 		}
 
 		@Override
-		public void sendAddToGRoup(int status) {}
+		public void responseCreateGroup(int msgID, String groupName, Status status) {
+			ResponseCreateGroup response = new ResponseCreateGroup(msgID, groupName, status);
+
+			try (OutputStream ops = clientSocket.socket().getOutputStream();
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+				baos.writeTo(ops);
+				oos.writeObject(response);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 
 		@Override
-		public void sendNewGroupMember(int newUsrID) {}
-		
-		@Override
-		public void sendLogin(int userID, int... groupID) {}
-		
-		@Override
-		public void sendCreateGroup(int groupID, int groupName) {}
-		
-		@Override
-		public void sendLeaveGroup(int status) {}
+		public void responseJoinGroup(int msgID, int userID, String userName, String groupName, Status status) {
+			ResponseJoinGroup response = new ResponseJoinGroup(msgID, userID, userName, groupName, status);
 
+			try (OutputStream ops = clientSocket.socket().getOutputStream();
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+				baos.writeTo(ops);
+				oos.writeObject(response);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void responseLeaveGroup(int msgID, int userID, String userName, String groupName, Status status) {
+			ResponseLeaveGroup response = new ResponseLeaveGroup(msgID, userID, userName, groupName, status);
+
+			try (OutputStream ops = clientSocket.socket().getOutputStream();
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+				baos.writeTo(ops);
+				oos.writeObject(response);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		@Override
+		public void responseMessage(int msgID, int userID, String userName, String groupName, UsrProperties prop,
+				String message, Status status) {
+			ResponseSend response = new ResponseSend(msgID, userID, userName, groupName, message, prop, status);
+
+			try (OutputStream ops = clientSocket.socket().getOutputStream();
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+				baos.writeTo(ops);
+				oos.writeObject(response);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static void main(String [] args) {
+		ChatServer server = new ChatServerHub();
+		new TCPCommunication(server, 55554);
 	}
 }
