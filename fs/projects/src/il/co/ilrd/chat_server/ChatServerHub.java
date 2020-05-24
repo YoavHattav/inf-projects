@@ -33,8 +33,10 @@ public class ChatServerHub implements ChatServer{
 	@Override
 	public void createNewGroup(int msgId, Integer userId, String groupName) {
 		User user = users.get(userId);
+		System.out.println(groupName);
 		if (groups.containsKey(groupName)) {
 			user.peer.responseCreateGroup(msgId, groupName, Status.GROUP_ALREADY_EXISTS);
+			return;
 		}
 		Group newGroup = new Group(groupName, user);
 		groups.put(groupName, newGroup);
@@ -82,7 +84,7 @@ public class ChatServerHub implements ChatServer{
 		Group group = groups.get(groupName);
 		User user = users.get(userId);
 		if (group == null) {
-			user.peer.responseMessage(msgId, user.id, user.name, groupName, group.usersInGroup.get(user.id), msg, Status.GROUP_NOT_FOUND);
+			user.peer.responseMessage(msgId, user.id, user.name, groupName, null, msg, Status.GROUP_NOT_FOUND);
 			return;
 		}
 		if (!group.usersInGroup.containsKey(user.id)) {

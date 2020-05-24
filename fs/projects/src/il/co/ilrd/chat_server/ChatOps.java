@@ -2,6 +2,8 @@ package il.co.ilrd.chat_server;
 
 import java.nio.channels.SocketChannel;
 
+import il.co.ilrd.chat_msg.*;
+
 public enum ChatOps {
 	LOGIN {
 		@Override
@@ -48,3 +50,5 @@ public enum ChatOps {
 	
 	public abstract void handleMsg(Request msg,  SocketChannel clientSocket, TCPCommunication commun);
 }
+
+
