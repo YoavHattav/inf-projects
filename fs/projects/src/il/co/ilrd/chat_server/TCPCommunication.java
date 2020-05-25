@@ -38,7 +38,6 @@ public class TCPCommunication implements Communication {
 			serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 			
 		} catch (IOException e) {
-			System.err.println("wtfffffffffffffffffffffffffff");
 			e.printStackTrace();
 		}
 		Init();
@@ -58,6 +57,7 @@ public class TCPCommunication implements Communication {
 					
 						SelectionKey currentKey = keyIterator.next();
 						if (currentKey.isAcceptable()) {
+							System.out.println("accepting");
 							ServerSocketChannel server = (ServerSocketChannel) currentKey.channel();
 							SocketChannel client;
 							try {
@@ -70,6 +70,7 @@ public class TCPCommunication implements Communication {
 							}
 						}
 						else if(currentKey.isReadable()) {
+							System.out.println("reading");
 							channel = (SocketChannel) currentKey.channel();
 							ByteBuffer buffer =  ByteBuffer.allocate(1024);
 							Request request = null;
@@ -78,19 +79,19 @@ public class TCPCommunication implements Communication {
 								//buffer.flip();
 								ByteArrayInputStream bis = new ByteArrayInputStream(buffer.array());
 					            ObjectInputStream ois = new ObjectInputStream(bis);
-					            request = (Request)ois.readObject();
-							} catch (ClassNotFoundException e) {
-								e.printStackTrace();
-							}
-							catch (IOException e) {
+					            Object requestObj = ois.readObject();
+					            if (requestObj instanceof Request) {
+					            	request = (Request)requestObj;
+					            	request.getOpId().handleMsg(request, channel, this);	
+					            }
+							}catch (IOException e) {
 								currentKey.cancel();
 								keyIterator.remove();
-								e.printStackTrace();
 								continue;
+							}catch (ClassNotFoundException e) {
+								e.printStackTrace();
 							}
-							request.getOpId().handleMsg(request, channel, this);	
 						}
-						
 						keyIterator.remove();
 				}
 			}
@@ -122,7 +123,7 @@ public class TCPCommunication implements Communication {
 		@Override
 		public void responseMessage(int msgID, int userID, String userName, String groupName, UsrProperties prop,
 				String message, Status status) {
-			send(new ResponseSend(msgID, userID, userName, groupName, message, prop, status));
+			send(new ResponseSend(msgID, userID, groupName, message, userName, prop, status));
 		}
 		private void send(Response reply) {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();

@@ -1,98 +1,127 @@
 package il.co.ilrd.chat_server;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
-
-import il.co.ilrd.collections.HashMap;
 
 public class ChatServerHub implements ChatServer{
 	
-	private Map<Integer, User> users = new HashMap<>();
-	private Map<String, Group> groups = new HashMap<>();
+	private Map<Integer, User> users;
+	private Map<String, Group> groups;
+	private Map<String, Integer> emailToId;
+	
+	ChatServerHub() {
+		users = new HashMap<>();
+		groups = new HashMap<>();
+		emailToId = new HashMap<>();
+	}
 	
 	@Override
 	public void logIn(int msgId, String email, String name, Peer peer) {
-		Collection<User> userCollection = users.values();
-		for (User user : userCollection) {
-			if (user.email.equalsIgnoreCase(email)) {
-				user.peer = peer;
-				peer.responseLogin(msgId, user.id, user.groupNames, Status.SUCCESS);
-				return;
-			}
+		if (null == email || null == name || null == peer) { 
+			return;
 		}
-		User user = new User(name, email, peer);
-		users.put(user.id, user);
-		peer.responseLogin(msgId, user.id, user.groupNames, Status.SUCCESS);
+		
+		Integer userID = emailToId.get(email);
+		User newUser;
+		if (null == userID) {
+			newUser = new User(name, email, peer);
+			userID = newUser.id;
+			users.put(userID, newUser);
+			emailToId.put(email, userID);
+		} else {
+			newUser = users.get(userID);
+			newUser.peer = peer;
+		}
+		
+		peer.responseLogin(msgId, userID, newUser.userGroups, Status.SUCCESS);
 	}
 	
 	@Override
 	public void createNewGroup(int msgId, Integer userId, String groupName) {
-		User user = users.get(userId);
-		System.out.println(groupName);
+		if (null == userId || null == groupName) { return; }
+		
 		if (groups.containsKey(groupName)) {
-			user.peer.responseCreateGroup(msgId, groupName, Status.GROUP_ALREADY_EXISTS);
+			users.get(userId).peer.responseCreateGroup(msgId, groupName,  Status.GROUP_ALREADY_EXISTS);
 			return;
-		}
-		Group newGroup = new Group(groupName, user);
+		} 
+		
+		Group newGroup = new Group(groupName);
+		Color color = new Color((int)(Math.random() * 0x1000000));
+		
+		newGroup.users.put(userId, new ColorUsrProperties(color));			
 		groups.put(groupName, newGroup);
-		user.peer.responseCreateGroup(msgId, groupName, Status.SUCCESS);
+		users.get(userId).userGroups.add(groupName);
+		users.get(userId).peer.responseCreateGroup(msgId, groupName,  Status.SUCCESS);
+		
 	}
-	
+
 	@Override
 	public void joinGroup(int msgId, Integer userId, String groupName) {
+		if (null == userId || null == groupName) { return; }
+		
+		Group groupToJoin = groups.get(groupName);
+		if (null == groupToJoin) {
+			users.get(userId).peer.responseJoinGroup(msgId, userId, users.get(userId).name, groupName, Status.GROUP_NOT_FOUND);
+			return;
+		} else if (groupToJoin.users.containsKey(userId)) {
+			users.get(userId).peer.responseJoinGroup(msgId, userId, users.get(userId).name, groupName, Status.ALREADY_IN_GROUP);
+			return;
+		}
+		
 		User user = users.get(userId);
-		Group group = groups.get(groupName);
-		if (group == null) {
-			user.peer.responseJoinGroup(msgId, user.id, user.name, groupName, Status.GROUP_NOT_FOUND);
-			return;
-		}
-		if (group.usersInGroup.containsKey(user.id)) {
-			user.peer.responseJoinGroup(msgId, user.id, user.name, groupName, Status.ALREADY_IN_GROUP);
-			return;
-		}
-		group.usersInGroup.put(userId, new ColorUsrProperties());
-		for (Integer id : group.usersInGroup.keySet()) {
-			users.get(id).peer.responseJoinGroup(msgId, user.id, user.name, groupName, Status.SUCCESS);
+		user.userGroups.add(groupName);
+		Color color = new Color((int)(Math.random() * 0x1000000));
+		ColorUsrProperties prop = new ColorUsrProperties(color);
+		groupToJoin.users.put(userId, prop);
+		groups.get(groupName).users.put(userId, prop);
+		for (Integer Id : groups.get(groupName).users.keySet()) {
+			if (null != users.get(Id).peer) {
+				users.get(userId).peer.responseJoinGroup(msgId, userId, users.get(userId).name, groupName, Status.SUCCESS);
+			}
 		}
 	}
-	
+
 	@Override
 	public void leaveGroup(int msgId, Integer userId, String groupName) {
-		Group group = groups.get(groupName);
-		User user = users.get(userId);
-		if (group == null) {
-			user.peer.responseLeaveGroup(msgId, userId, user.name, groupName, Status.GROUP_NOT_FOUND);
+		if (null == userId || null == groupName) { return; }
+		Group groupToLeave = groups.get(groupName);
+		if (null == groupToLeave) {
+			users.get(userId).peer.responseLeaveGroup(msgId, userId, users.get(userId).name, groupName, Status.GROUP_NOT_FOUND);
+			return;
+		} else if (!groupToLeave.users.containsKey(userId)) {
+			users.get(userId).peer.responseLeaveGroup(msgId, userId, users.get(userId).name, groupName, Status.NOT_IN_GROUP);
 			return;
 		}
-		if (!group.usersInGroup.containsKey(user.id)) {
-			user.peer.responseLeaveGroup(msgId, user.id, user.name, groupName, Status.NOT_IN_GROUP);
-			return;
+
+		for (Integer Id : groups.get(groupName).users.keySet()) {
+			if (null != users.get(Id).peer) {
+				users.get(Id).peer.responseLeaveGroup(msgId, userId, users.get(userId).name, groupName, Status.SUCCESS);						
+			}
 		}
-		group.usersInGroup.remove(user.id);
-		for (Integer id : group.usersInGroup.keySet()) {
-			users.get(id).peer.responseLeaveGroup(msgId, user.id, user.name, groupName, Status.SUCCESS);
-		}
+		users.get(userId).userGroups.remove(groupName);
+		groups.get(groupName).users.remove(userId);
+		groupToLeave.users.remove(userId);
 	}
-	
+
 	@Override
 	public void sendMsg(int msgId, Integer userId, String groupName, String msg) {
+		if (null == userId || null == groupName || null == msg) { return; }
 		Group group = groups.get(groupName);
-		User user = users.get(userId);
-		if (group == null) {
-			user.peer.responseMessage(msgId, user.id, user.name, groupName, null, msg, Status.GROUP_NOT_FOUND);
+		if (null == group) {
+			users.get(userId).peer.responseMessage(msgId, userId, users.get(userId).name, groupName, new ColorUsrProperties(Color.RED), "Group not found", Status.GROUP_NOT_FOUND);
+			return;
+		} else if (!group.users.containsKey(userId)) {
+			users.get(userId).peer.responseMessage(msgId, userId, users.get(userId).name, groupName, new ColorUsrProperties(Color.RED), "Not in group", Status.NOT_IN_GROUP);
 			return;
 		}
-		if (!group.usersInGroup.containsKey(user.id)) {
-			user.peer.responseMessage(msgId, user.id, user.name, groupName, new ColorUsrProperties(), msg, Status.NOT_IN_GROUP);
-			return;
-		}
-		for (Integer id : group.usersInGroup.keySet()) {
-			users.get(id).peer.responseMessage(msgId, user.id, user.name, groupName, group.usersInGroup.get(user.id), msg, Status.SUCCESS);
+		
+		for (Integer Id : groups.get(groupName).users.keySet()) {
+			if (null != users.get(Id).peer) {
+				users.get(Id).peer.responseMessage(msgId, userId, users.get(userId).name, groupName, groups.get(groupName).users.get(userId), msg, Status.SUCCESS);							
+			}
 		}
 	}
 	
@@ -102,40 +131,45 @@ public class ChatServerHub implements ChatServer{
 		private int id;
 		private Peer peer;
 		private static int counter;
-		private Set<String> groupNames = new HashSet<String>(); 
+		private Set<String> userGroups;
 		
 		public User(String name, String email, Peer peer) {
 			this.name = name;
 			this.email = email;
 			this.id = ++counter;
 			this.peer = peer;
+			userGroups = new HashSet<>();
 		}	
 	}
 	
-	private static class Group {
-		private Map<Integer, UsrProperties> usersInGroup = new HashMap<Integer, UsrProperties>();
+	static class Group {
+		private static int groupIdCounter;
+		private int groupID;
 		private String name;
+		Map<Integer, UsrProperties> users;
 		
-		public Group(String name, User user) {
+		Group(String name) {
 			this.name = name;
-			usersInGroup.put(user.id, new ColorUsrProperties());
-		}	
-	}
-	private static class ColorUsrProperties implements UsrProperties{
-		private Color color;
-		private Random rand;
-		
-		public ColorUsrProperties() {
-			rand = new Random();
-			float r = rand.nextFloat();
-			float g = rand.nextFloat();
-			float b = rand.nextFloat();
-			this.color = new Color(r, g, b);
+			groupID = ++groupIdCounter;
+			users = new HashMap<>();
 		}
-
+	}
+	
+	static class ColorUsrProperties implements UsrProperties{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -723772885435135941L;
+		private Color color;
+		
+		public ColorUsrProperties(Color color) {
+			this.color = color;
+		}
 		@Override
 		public Color getColor() {
 			return color;
 		}
 	}
+
+	
 }

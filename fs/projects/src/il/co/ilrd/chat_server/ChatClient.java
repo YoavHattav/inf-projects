@@ -30,7 +30,7 @@ public class ChatClient {
 		}
 	}
 	
-	public void responseThread() {
+	public void responseCatcherThread() {
 		new Thread(() -> {
 			while (true) {
 				try {
@@ -44,6 +44,12 @@ public class ChatClient {
 					
 				} catch (ClassNotFoundException | IOException e) {
 					System.out.println("cant connect");
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 					e.printStackTrace();
 				}
 			}}).start();
@@ -77,8 +83,8 @@ public class ChatClient {
 	
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		ChatClient chatClient = new ChatClient();
+		chatClient.responseCatcherThread();
 		chatClient.other();
-		chatClient.responseThread();
 	}
 
 	public enum ClientOps {
@@ -213,7 +219,8 @@ public class ChatClient {
 				String sender = resp.getSenderName();
 				String msg = resp.getMsg();
 				//Color color = resp.getProp().getColor();
-
+				System.out.println(sender + " in group " + group + " says:");
+				System.out.println(msg);
 				if (userId != c.clientId) {
 					System.out.println(sender + " in group " + group + " says:");
 					System.out.println(msg);

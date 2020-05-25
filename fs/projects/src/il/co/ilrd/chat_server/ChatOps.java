@@ -30,7 +30,7 @@ public enum ChatOps {
 		@Override
 		public void handleMsg(Request msg,  SocketChannel clientSocket, TCPCommunication commun) {
 			RequestLeaveGroup leaveRequest = (RequestLeaveGroup)msg;
-			commun.server.leaveGroup(leaveRequest.getMsgID(), leaveRequest.getMsgID(), leaveRequest.getGroupName());
+			commun.server.leaveGroup(leaveRequest.getMsgID(), leaveRequest.getUserId(), leaveRequest.getGroupName());
 		}
 	},
 	SEND_MSG {
