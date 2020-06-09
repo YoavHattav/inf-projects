@@ -22,7 +22,7 @@ public class ChatClient {
 	
 	public ChatClient() {
 		try {
-			this.clientSocket = new Socket("localhost", 55554);
+			this.clientSocket = new Socket("10.1.0.21", 55554);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -37,17 +37,11 @@ public class ChatClient {
 					ObjectInputStream ois = new ObjectInputStream(new DataInputStream(clientSocket.getInputStream()));
 					Response response = (Response) ois.readObject();
 					ResponseOps.valueOf(response.getOpId().toString()).handleResponse(this, response);
-					
-					System.out.println(response.getMsgID());
-					System.out.println(response.getStatus());
-					System.out.println(response.getOpId());
-					
 				} catch (ClassNotFoundException | IOException e) {
 					System.out.println("cant connect");
 					try {
-						Thread.sleep(1000);
+						Thread.sleep(3000);
 					} catch (InterruptedException e1) {
-						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
 					e.printStackTrace();
@@ -55,12 +49,13 @@ public class ChatClient {
 			}}).start();
 	}
 	
-	public void other() {
-		while (true) {
-			
-			Scanner myObj = new Scanner(System.in); 
+	public void operationHandler() {
+		Scanner myObj = new Scanner(System.in);
+		
+		System.out.println("you are loged in");
+		while (true) {	
 			System.out.println("Enter operation");
-			String operation = myObj.nextLine(); 
+			String operation = myObj.nextLine();
 			
 			try {
 				ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -84,7 +79,7 @@ public class ChatClient {
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		ChatClient chatClient = new ChatClient();
 		chatClient.responseCatcherThread();
-		chatClient.other();
+		chatClient.operationHandler();
 	}
 
 	public enum ClientOps {
@@ -219,8 +214,7 @@ public class ChatClient {
 				String sender = resp.getSenderName();
 				String msg = resp.getMsg();
 				//Color color = resp.getProp().getColor();
-				System.out.println(sender + " in group " + group + " says:");
-				System.out.println(msg);
+				
 				if (userId != c.clientId) {
 					System.out.println(sender + " in group " + group + " says:");
 					System.out.println(msg);

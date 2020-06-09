@@ -39,14 +39,13 @@ public enum ChatOps {
 			RequestSend sendRequest = (RequestSend)msg;
 			commun.server.sendMsg(sendRequest.getMsgID(), sendRequest.getUserId(), sendRequest.getGroupName(), sendRequest.getMsg());
 		}
-	};
+	},
 
-	/*LOGOUT {
+	LOGOUT {
 		@Override
 		public void handleMsg(Request msg,  SocketChannel clientSocket, TCPCommunication commun) {
-			Req
 		}
-	};*/
+	};
 	
 	public abstract void handleMsg(Request msg,  SocketChannel clientSocket, TCPCommunication commun);
 }

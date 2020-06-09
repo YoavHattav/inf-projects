@@ -3,9 +3,7 @@ package il.co.ilrd.chat_msg;
 import il.co.ilrd.chat_server.ChatOps;
 
 class RequestLogout extends Request {
-	/**
-	 * 
-	 */
+	
 	private static final long serialVersionUID = -4038599863487136690L;
 	private int userId;
 	private String groupName;

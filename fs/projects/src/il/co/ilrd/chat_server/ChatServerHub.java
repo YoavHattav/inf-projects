@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 public class ChatServerHub implements ChatServer{
@@ -51,7 +52,7 @@ public class ChatServerHub implements ChatServer{
 		Group newGroup = new Group(groupName);
 		Color color = new Color((int)(Math.random() * 0x1000000));
 		
-		newGroup.users.put(userId, new ColorUsrProperties(color));			
+		newGroup.users.put(userId, new ColorUsrProperties());			
 		groups.put(groupName, newGroup);
 		users.get(userId).userGroups.add(groupName);
 		users.get(userId).peer.responseCreateGroup(msgId, groupName,  Status.SUCCESS);
@@ -74,7 +75,7 @@ public class ChatServerHub implements ChatServer{
 		User user = users.get(userId);
 		user.userGroups.add(groupName);
 		Color color = new Color((int)(Math.random() * 0x1000000));
-		ColorUsrProperties prop = new ColorUsrProperties(color);
+		ColorUsrProperties prop = new ColorUsrProperties();
 		groupToJoin.users.put(userId, prop);
 		groups.get(groupName).users.put(userId, prop);
 		for (Integer Id : groups.get(groupName).users.keySet()) {
@@ -111,10 +112,10 @@ public class ChatServerHub implements ChatServer{
 		if (null == userId || null == groupName || null == msg) { return; }
 		Group group = groups.get(groupName);
 		if (null == group) {
-			users.get(userId).peer.responseMessage(msgId, userId, users.get(userId).name, groupName, new ColorUsrProperties(Color.RED), "Group not found", Status.GROUP_NOT_FOUND);
+			users.get(userId).peer.responseMessage(msgId, userId, users.get(userId).name, groupName, new ColorUsrProperties(), "Group not found", Status.GROUP_NOT_FOUND);
 			return;
 		} else if (!group.users.containsKey(userId)) {
-			users.get(userId).peer.responseMessage(msgId, userId, users.get(userId).name, groupName, new ColorUsrProperties(Color.RED), "Not in group", Status.NOT_IN_GROUP);
+			users.get(userId).peer.responseMessage(msgId, userId, users.get(userId).name, groupName, new ColorUsrProperties(), "Not in group", Status.NOT_IN_GROUP);
 			return;
 		}
 		
@@ -162,14 +163,13 @@ public class ChatServerHub implements ChatServer{
 		private static final long serialVersionUID = -723772885435135941L;
 		private Color color;
 		
-		public ColorUsrProperties(Color color) {
-			this.color = color;
+		public ColorUsrProperties() {
+			color = getColor();
 		}
 		@Override
 		public Color getColor() {
-			return color;
+			Random rand = new Random();
+			return new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat());
 		}
 	}
-
-	
 }

@@ -33,7 +33,7 @@ public class TCPCommunication implements Communication {
 			selector = Selector.open();
 			serverChannel = ServerSocketChannel.open();
 			serverSocket =  serverChannel.socket();
-			serverSocket.bind(new InetSocketAddress("localhost", portNum));
+			serverSocket.bind(new InetSocketAddress("10.1.0.21", portNum));
 			serverChannel.configureBlocking(false);
 			serverChannel.register(selector, SelectionKey.OP_ACCEPT);
 			
@@ -126,6 +126,7 @@ public class TCPCommunication implements Communication {
 			send(new ResponseSend(msgID, userID, groupName, message, userName, prop, status));
 		}
 		private void send(Response reply) {
+			if (clientSocket == null) { return; }
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream out;
 			try {
@@ -135,7 +136,13 @@ public class TCPCommunication implements Communication {
 				ByteBuffer bb = ByteBuffer.wrap(bos.toByteArray());
 				clientSocket.write(bb);
 			} catch (IOException e) {
-				e.printStackTrace();
+				try {
+					clientSocket.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}finally {
+					clientSocket = null;
+				}
 			}
 		}
 	}
