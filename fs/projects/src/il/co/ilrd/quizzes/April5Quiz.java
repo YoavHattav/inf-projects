@@ -5,7 +5,6 @@ import java.util.List;
 
 public class April5Quiz {
 	//was April5Quiz<T> in the quiz.. made it string for it to compile.
-
 	public void printFall(List<String> list) {
 		System.out.println(list.toString());
 	}
