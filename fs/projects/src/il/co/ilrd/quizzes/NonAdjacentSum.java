@@ -20,8 +20,8 @@ public class NonAdjacentSum {
     }
 
 	public static void main(String[] args) {
-		int[] array = {13, 1 ,-6 , 2, 43 , 65 ,-18 ,14 ,13, 22};
-
+		int[] array = {13, 1 , 2, 43 , 65 ,7,120};
+		System.out.println(new NonAdjacentSum().nonAdjacentSum(array));
 	}
 
 }
