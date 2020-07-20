@@ -1,7 +1,7 @@
 package il.co.ilrd.quizzes;
 
 
-public class SwapSllPairs {
+public class SwapSllPairs implements Cloneable{
 	private ListNode head = new ListNode(null, null);
 	public class ListNode {
 		private Integer data;
@@ -62,6 +62,18 @@ public class SwapSllPairs {
 			System.out.println(new_node.data);
 			new_node = new_node.nextNode;
 		}
-	}
+		SwapSllPairs and = new SwapSllPairs();
+		and.head.data = 5;
+		
+			try {
+				SwapSllPairs yo = (SwapSllPairs)and.clone();
+				System.out.println(yo.head.data);
+			} catch (CloneNotSupportedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+		
+		}
 
 }
