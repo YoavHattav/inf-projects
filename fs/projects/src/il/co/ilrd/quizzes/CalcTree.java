@@ -20,7 +20,7 @@ public class CalcTree {
 	private static BiFunction<Integer, Integer, Integer> div_func = (x1, x2) -> x1 / x2;
 	private static BiFunction<Integer, Integer, Integer> mult_func = (x1, x2) -> x1 * x2;
 
-	private static Map<Character, BiFunction> operations = new HashMap<>();
+	private static Map<Character, BiFunction<Integer, Integer, Integer>> operations = new HashMap<>();
 	
 	public CalcTree() {
 		operations.put('+', plus_func);
