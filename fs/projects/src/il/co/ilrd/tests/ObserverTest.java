@@ -34,7 +34,7 @@ class ObserverTest {
 			Callback<String> cb = new Callback<String>(this::congrads, this::deathNotice);
 
 			void congrads(String vid_name) {
-				System.out.println("congradulations for the new vid:" + vid_name +"!");
+				System.out.println("congradulations for the new vid:" + vid_name + "!");
 			}
 			void deathNotice() {
 				System.out.println("channel removed successfully");
