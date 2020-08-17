@@ -19,21 +19,10 @@ public class FirstRepeating {
 		return '?';
 	}
 	
-	static char firstReperatingLogN(char[] str) {
-		Arrays.sort(str);
-		for (int i = 1; i < str.length; ++i) {
-			if (str[i] == str[i-1]) {
-				return str[i];
-			}
-		}
-		return '?';
-	}
-	
 	static char firstRepeatingNOnN(char[] str) {
 		for (int i = 0; i < str.length; ++i) {
 			for (int j = 0; j < (i) ; ++j) {
 				if (str[i] == str[j]) {
-					System.out.println(j +  " " + i);
 					return str[i];
 				}
 			}
@@ -42,28 +31,28 @@ public class FirstRepeating {
 	}
 	
 	public static void main(String[] args) {
-//		char[] str1 = {'a','b','c','d','e','f'};
-//		char[] str2 = {'a','b','c','d','e','f','a'};
+		char[] str1 = {'a','b','c','d','e','f'};
+		char[] str2 = {'a','b','c','d','e','f','a'};
 		
 		char[] str3 = {'a', 'c', 'b', 'b', 'a', 'c'};
 		
-//		for (char ch : str3) {
-//			System.out.print(ch);
-//		}
-//		
-//		System.out.println(firstRepeatingNOnN(str1));
-//		System.out.println(firstRepeatingNOnN(str2));
-//		
-//		System.out.println(firstReperatingLogN(str1));
-//		System.out.println(firstReperatingLogN(str2));
-//		
-//		System.out.println(firstReperatingN(str1));
-//		System.out.println(firstReperatingN(str2));
+		for (char ch : str3) {
+			System.out.print(ch);
+		}
+		
+		System.out.println(firstRepeatingNOnN(str1));
+		System.out.println(firstRepeatingNOnN(str2));
+		
+		System.out.println(firstReperatingLogN(str1));
+		System.out.println(firstReperatingLogN(str2));
+		
+		System.out.println(firstReperatingN(str1));
+		System.out.println(firstReperatingN(str2));
 		
 		
 		System.out.println(firstRepeatingNOnN(str3));
-//		System.out.println(firstReperatingLogN(str3));
-//		System.out.println(firstReperatingN(str3));
+		System.out.println(firstReperatingLogN(str3));
+		System.out.println(firstReperatingN(str3));
 
 
 	}
