@@ -39,21 +39,5 @@ public class FirstRepeating {
 		for (char ch : str3) {
 			System.out.print(ch);
 		}
-		
-		System.out.println(firstRepeatingNOnN(str1));
-		System.out.println(firstRepeatingNOnN(str2));
-		
-		System.out.println(firstReperatingLogN(str1));
-		System.out.println(firstReperatingLogN(str2));
-		
-		System.out.println(firstReperatingN(str1));
-		System.out.println(firstReperatingN(str2));
-		
-		
-		System.out.println(firstRepeatingNOnN(str3));
-		System.out.println(firstReperatingLogN(str3));
-		System.out.println(firstReperatingN(str3));
-
-
 	}
 }
